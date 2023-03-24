@@ -6,11 +6,9 @@ const state = {
   token: getToken(),
   user_id: 0,
   name: "",
-  email: "",
+  mobile: "",
   avatar: "",
   introduction: "",
-  roles: [],
-  permissions: [],
 };
 
 const mutations = {
@@ -18,37 +16,20 @@ const mutations = {
     state.token = token;
   },
   SET_LOGIN_INFO: (state, data) => {
-    const { id, roles, username, avatar, email, permissions } = data;
-    state.user_id = id;
-    state.roles = roles;
+    const { user_id, username, avatar, mobile } = data;
+    state.user_id = user_id;
     state.name = username;
     state.avatar = avatar;
-    state.email = email;
-    state.permissions = permissions;
+    state.mobile = mobile;
   },
 };
 
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    const { email, pass } = userInfo;
+    const { mobile, pass } = userInfo;
     return new Promise((resolve, reject) => {
-      login({ email: email.trim(), pass })
-        .then((response) => {
-          const { data } = response;
-          commit("SET_TOKEN", data.token);
-          setToken(data.token);
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  },
-  // sso login
-  ssoLogin({ commit }, ticket) {
-    return new Promise((resolve, reject) => {
-      ssoLogin({ ticket })
+      login({ mobile: mobile.trim(), pass })
         .then((response) => {
           const { data } = response;
           commit("SET_TOKEN", data.token);
@@ -70,7 +51,6 @@ const actions = {
           if (!data) {
             reject("获取用户信息失败，请重新登陆.");
           }
-          data.roles = [data.role_id];
           commit("SET_LOGIN_INFO", data);
           resolve(data);
         })
@@ -87,11 +67,9 @@ const actions = {
         .then(() => {
           commit("SET_TOKEN", "");
           commit("SET_LOGIN_INFO", {
-            id: 0,
-            roles: [],
-            permissions: [],
+            user_id: 0,
             username: "",
-            email: "",
+            mobile: "",
             avatar: "",
           });
           removeToken();
@@ -114,11 +92,9 @@ const actions = {
     return new Promise((resolve) => {
       commit("SET_TOKEN", "");
       commit("SET_LOGIN_INFO", {
-        id: 0,
-        roles: [],
-        permissions: [],
+        user_id: 0,
         username: "",
-        email: "",
+        mobile: "",
         avatar: "",
       });
       removeToken();

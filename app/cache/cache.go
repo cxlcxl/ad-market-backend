@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"bs.mobgi.cc/app/vars"
-	"bs.mobgi.cc/library/redis"
+	"market/app/vars"
+	"market/library/redis"
 	"gorm.io/gorm"
 )
 

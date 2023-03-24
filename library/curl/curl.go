@@ -1,12 +1,12 @@
 package curl
 
 import (
-	"bs.mobgi.cc/app/vars"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"market/app/vars"
 	"net/http"
 )
 

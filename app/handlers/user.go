@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"bs.mobgi.cc/app/model"
-	"bs.mobgi.cc/app/response"
-	"bs.mobgi.cc/app/service/jwt"
-	"bs.mobgi.cc/app/utils"
-	"bs.mobgi.cc/app/validator/v_data"
-	"bs.mobgi.cc/app/vars"
 	"github.com/gin-gonic/gin"
+	"market/app/model"
+	"market/app/response"
+	"market/app/service/jwt"
+	serviceuser "market/app/service/user"
+	"market/app/utils"
+	"market/app/validator/v_data"
+	"market/app/vars"
 	"strconv"
 	"time"
 )
@@ -87,13 +88,15 @@ func (l *User) UserCreate(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VUserCreate)
 	s := utils.GenerateSecret(0)
 	user := &model.User{
-		Username:  params.Username,
-		Mobile:    params.Mobile,
-		State:     1,
-		Secret:    s,
-		Pass:      utils.Password(params.Pass, s),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Username: params.Username,
+		Mobile:   params.Mobile,
+		State:    1,
+		Secret:   s,
+		Pass:     utils.Password(params.Pass, s),
+		Timestamp: model.Timestamp{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
 	}
 	err := model.NewUser(vars.DBMysql).CreateUser(user)
 	if err != nil {
@@ -122,6 +125,30 @@ func (l *User) UserUpdate(ctx *gin.Context, p interface{}) {
 	err = model.NewUser(vars.DBMysql).UpdateUser(d, params.Id)
 	if err != nil {
 		response.Fail(ctx, "修改失败："+err.Error())
+		return
+	}
+	response.Success(ctx, nil)
+}
+
+func (l *User) VSelfUpdate(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VSelfUpdate)
+	d := map[string]interface{}{
+		"username":   params.Username,
+		"mobile":     params.Mobile,
+		"updated_at": time.Now(),
+	}
+	err := model.NewUser(vars.DBMysql).UpdateUser(d, params.User.UserId)
+	if err != nil {
+		response.Fail(ctx, "修改失败："+err.Error())
+		return
+	}
+	response.Success(ctx, nil)
+}
+
+func (l User) ResetPass(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VResetPass)
+	if err := serviceuser.ResetPass(params); err != nil {
+		response.Fail(ctx, "密码修改失败："+err.Error())
 		return
 	}
 	response.Success(ctx, nil)

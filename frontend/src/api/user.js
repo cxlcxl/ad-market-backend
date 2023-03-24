@@ -1,20 +1,5 @@
 import request from "@/utils/request";
 
-export function ssoLoginPath() {
-  return request({
-    url: "/sso-login",
-    method: "get",
-  });
-}
-
-export function ssoLogin(data) {
-  return request({
-    url: "/sso-login",
-    method: "post",
-    data,
-  });
-}
-
 export function login(data) {
   return request({
     url: "/login",
@@ -46,7 +31,7 @@ export function logout() {
 
 export function create(data) {
   return request({
-    url: "/user/create",
+    url: '/user/create',
     method: "post",
     data,
   });

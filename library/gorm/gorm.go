@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"bs.mobgi.cc/app/vars"
+	"market/app/vars"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

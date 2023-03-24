@@ -4,11 +4,11 @@ import (
 	"log"
 	"time"
 
-	"bs.mobgi.cc/app/vars"
-	"bs.mobgi.cc/library/config_interface"
-	"bs.mobgi.cc/library/container"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"market/app/vars"
+	"market/library/config_interface"
+	"market/library/container"
 )
 
 // CreateYamlFactory 参数设置为可变参数的文件名，这样参数就可以不需要传递，如果传递了多个，我们只取第一个参数作为配置文件名

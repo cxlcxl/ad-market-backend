@@ -1,23 +1,36 @@
 package validator
 
 import (
-	"bs.mobgi.cc/app/response"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"market/app/response"
+	"market/app/vars"
+	"reflect"
+	"regexp"
 )
 
 const (
 	appCodeRule = `^[a-z0-9A-Z\_]{1,50}$`
 	ticketRule  = `^[a-z0-9]+$`
-	uuidRule    = `^[a-z0-9\-]{36}$`
+	mobileRule  = `^(1)[\d]{10}$`
 )
 
 type BsValidator struct{}
 
+var (
+	customValid = map[string]validator.Func{
+		"pass":   pass,
+		"mobile": mobile,
+	}
+)
+
 func RegisterValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		_ = v.RegisterValidation("pass", pass)
+		for s, f := range customValid {
+			_ = v.RegisterValidation(s, f)
+		}
 	}
 }
 
@@ -26,6 +39,14 @@ func pass(fl validator.FieldLevel) bool {
 	//	return false
 	//}
 	return true
+}
+
+func mobile(fl validator.FieldLevel) bool {
+	if match, err := regexp.MatchString(mobileRule, fl.Field().String()); err != nil {
+		return false
+	} else {
+		return match
+	}
 }
 
 func emptyValidator(_ *gin.Context, _ interface{}) error {
@@ -54,4 +75,14 @@ func bindData(ctx *gin.Context, v interface{}, h func(*gin.Context, interface{})
 
 func bindRouteData(ctx *gin.Context, key string, h func(c *gin.Context, t string)) {
 	h(ctx, ctx.Param(key))
+}
+
+func fillUser(ctx *gin.Context, p interface{}) error {
+	if _, ok := reflect.TypeOf(p).Elem().FieldByName("User"); !ok {
+		return errors.New("用户信息绑定失败，请检查是否包含 User 结构体")
+	} else {
+		u, _ := ctx.Get(vars.LoginUserKey)
+		reflect.ValueOf(p).Elem().FieldByName("User").Set(reflect.ValueOf(u))
+	}
+	return nil
 }

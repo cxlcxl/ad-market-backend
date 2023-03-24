@@ -1,5 +1,4 @@
 import { asyncRoutes, constantRoutes } from "@/router";
-import { rolesHasSuperAdmin } from "@/utils/permission";
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -55,17 +54,8 @@ const mutations = {
 const actions = {
   generateRoutes({ commit }, auths) {
     return new Promise((resolve) => {
-      // const { roles, permissions } = auths;
-      // console.log(auths);
-      // let accessedRoutes;
-      // if (rolesHasSuperAdmin(roles)) {
-      //   let accessedRoutes = asyncRoutes || [];
-      // } else {
-      //   accessedRoutes = filterAsyncRoutes(asyncRoutes, permissions);
-      // }
-
-      commit("SET_ROUTES", asyncRoutes);
-      resolve(asyncRoutes);
+      commit("SET_ROUTES", []);
+      resolve([]);
     });
   },
 };

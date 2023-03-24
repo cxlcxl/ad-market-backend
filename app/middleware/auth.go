@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"bs.mobgi.cc/app/response"
-	"bs.mobgi.cc/app/service/jwt"
-	"bs.mobgi.cc/app/vars"
 	"github.com/gin-gonic/gin"
+	"market/app/response"
+	"market/app/service/jwt"
+	"market/app/vars"
 	"strings"
 )
 

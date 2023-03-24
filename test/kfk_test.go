@@ -1,7 +1,7 @@
 package test
 
 import (
-	"bs.mobgi.cc/library/queue"
+	"market/library/queue"
 	"github.com/Shopify/sarama"
 	"strconv"
 	"testing"

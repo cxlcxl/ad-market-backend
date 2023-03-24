@@ -6,8 +6,8 @@
           <div class="title-container">
             <h3 class="title">{{ SiteTitle }} Login</h3>
           </div>
-          <el-form-item prop="email">
-            <el-input v-model="loginForm.email" placeholder="请输入邮箱" />
+          <el-form-item prop="mobile">
+            <el-input v-model="loginForm.mobile" placeholder="请输入手机号" />
           </el-form-item>
 
           <el-form-item prop="pass">
@@ -20,10 +20,6 @@
               <el-button :loading="loading" type="primary" size="medium" @click.native.prevent="handleLogin">Login
               </el-button>
             </div>
-            <div style="text-align: center; margin-top: 10px;" v-if="ssoPath !==''">
-              <span style="color: #606266; font-weight: 500; color: #409eff; cursor: pointer;text-decoration: underline;"
-                @click="handleSsoLogin">跳转单点登录 >>></span>
-            </div>
           </el-form-item>
         </el-form>
       </el-col>
@@ -32,19 +28,18 @@
 </template>
 
 <script>
-import { validEmail, validMobile } from "@/utils/validate"
+import { validMobile } from "@/utils/validate"
 import Banner from "./components/banner"
 import SocialSign from "./components/SocialSignin"
 import Settings from "@/settings"
-import { ssoLoginPath } from "@/api/user"
 
 export default {
   name: "Login",
   components: { SocialSign, Banner },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validEmail(value) && !validMobile(value)) {
-        callback(new Error("请填写正确的邮箱或手机号"))
+      if (!validMobile(value)) {
+        callback(new Error("请填写正确的手机号"))
       } else {
         callback()
       }
@@ -58,11 +53,11 @@ export default {
     }
     return {
       loginForm: {
-        email: "",
+        mobile: "",
         pass: "",
       },
       loginRules: {
-        email: [{ required: true, trigger: "blur", validator: validateUsername }],
+        mobile: [{ required: true, trigger: "blur", validator: validateUsername }],
         pass: [{ required: true, trigger: "blur", validator: validatePassword }],
       },
       passwordType: "password",
@@ -70,7 +65,6 @@ export default {
       loading: false,
       redirect: undefined,
       otherQuery: {},
-      ssoPath: "",
     }
   },
   computed: {
@@ -96,11 +90,6 @@ export default {
     } else if (this.loginForm.password === "") {
       this.$refs.password.focus()
     }
-    ssoLoginPath()
-      .then((res) => {
-        this.ssoPath = res.data
-      })
-      .catch(() => {})
   },
   methods: {
     checkCapslock(e) {
@@ -146,11 +135,6 @@ export default {
         }
         return acc
       }, {})
-    },
-    handleSsoLogin() {
-      if (this.ssoPath !== "") {
-        window.location.href = this.ssoPath
-      }
     },
   },
 }

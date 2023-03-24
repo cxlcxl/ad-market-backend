@@ -6,7 +6,7 @@
           <el-input v-model="search.username" class="w150" clearable placeholder="用户名" />
         </el-form-item>
         <el-form-item>
-          <el-input v-model="search.email" class="w230" clearable placeholder="邮箱" />
+          <el-input v-model="search.mobile" class="w230" clearable placeholder="手机号" />
         </el-form-item>
         <el-form-item>
           <el-select v-model="search.state" placeholder="用户状态" class="w110">
@@ -25,12 +25,8 @@
     <el-col :span="24">
       <el-table v-loading="loadings.pageLoading" :data="userList.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="email" label="邮箱" width="220" />
-        <el-table-column prop="username" label="用户名" width="180" />
-        <el-table-column prop="mobile" label="手机号" width="130" />
-        <el-table-column label="角色">
-          <template slot-scope="scope">{{ scope.row.role_id|userRolesFilter(roles) }}</template>
-        </el-table-column>
+        <el-table-column prop="username" label="用户名"/>
+        <el-table-column prop="mobile" label="手机号" />
         <el-table-column label="状态" width="90" align="center">
           <template slot-scope="scope">
             {{ scope.row.state === 1 ? '正常' : '停用' }}
@@ -51,15 +47,14 @@
     <el-col :span="24" style="margin-top: 15px;">
       <page ref="page" :page="search.page" :total="userList.total" @current-change="handlePage" @size-change="handlePageSize" />
 
-      <user-create ref="userCreate" @success="getUserList" :roles="roles" />
-      <user-update ref="userUpdate" @success="getUserList" :roles="roles" />
+      <user-create ref="userCreate" @success="getUserList" />
+      <user-update ref="userUpdate" @success="getUserList" />
     </el-col>
   </el-row>
 </template>
 
 <script>
 import { list } from "@a/user"
-import { roleList } from "@a/role"
 import UserCreate from "./components/add-user"
 import UserUpdate from "./components/edit-user"
 import Page from "@c/Page"
@@ -81,9 +76,8 @@ export default {
         total: 0,
         list: [],
       },
-      roles: [],
       search: {
-        email: "",
+        mobile: "",
         username: "",
         state: 1,
         page: 1,
@@ -93,18 +87,6 @@ export default {
   },
   computed: {},
   filters: {
-    userRolesFilter(role_id, roles) {
-      let r = []
-      if (roles === null || !roles || roles.length === 0) {
-        return ""
-      }
-      for (let i = 0; i < roles.length; i++) {
-        if (role_id === roles[i].id) {
-          return roles[i].role_name
-        }
-      }
-      return ""
-    },
     timeFormat(t) {
       return parseTime(t)
     },
@@ -115,28 +97,14 @@ export default {
   methods: {
     getUserList() {
       this.loadings.pageLoading = true
-      Promise.all([this.userRoles()])
-        .then(() => {
-          list(this.search)
-            .then((res) => {
-              this.userList = res.data
-              this.loadings.pageLoading = false
-            })
-            .catch(() => {
-              this.loadings.pageLoading = false
-            })
+      list(this.search)
+        .then((res) => {
+          this.userList = res.data
+          this.loadings.pageLoading = false
         })
         .catch(() => {
           this.loadings.pageLoading = false
         })
-    },
-    userRoles() {
-      if (this.roles.length > 0) {
-        return true
-      }
-      roleList({ state: 1, role_name: "" }).then((res) => {
-        this.roles = res.data
-      })
     },
     add() {
       this.$refs.userCreate.visible = true

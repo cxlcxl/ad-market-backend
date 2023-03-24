@@ -1,8 +1,8 @@
 package error_catch
 
 import (
-	"bs.mobgi.cc/app/validator"
 	"fmt"
+	"market/app/validator"
 )
 
 // ValidateErr Key: 'LoginData.Email' Error:Field validation for 'Email' failed on the 'email' tag"

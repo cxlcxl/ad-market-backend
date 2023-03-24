@@ -1,9 +1,9 @@
 package validator
 
 import (
-	"bs.mobgi.cc/app/handlers"
-	"bs.mobgi.cc/app/validator/v_data"
 	"github.com/gin-gonic/gin"
+	"market/app/handlers"
+	"market/app/validator/v_data"
 )
 
 func (v BsValidator) VUserList(ctx *gin.Context) {
@@ -21,6 +21,11 @@ func (v BsValidator) VUserUpdate(ctx *gin.Context) {
 	bindData(ctx, &params, (&handlers.User{}).UserUpdate)
 }
 
+func (v BsValidator) VSelfUpdate(ctx *gin.Context) {
+	var params v_data.VSelfUpdate
+	bindData(ctx, &params, (&handlers.User{}).VSelfUpdate, fillUser)
+}
+
 func (v BsValidator) VUserInfo(ctx *gin.Context) {
 	bindRouteData(ctx, "id", (&handlers.User{}).UserInfo)
 }
@@ -28,4 +33,9 @@ func (v BsValidator) VUserInfo(ctx *gin.Context) {
 func (v BsValidator) VLogin(ctx *gin.Context) {
 	var params v_data.VLogin
 	bindData(ctx, &params, (&handlers.User{}).Login)
+}
+
+func (v BsValidator) VResetPass(ctx *gin.Context) {
+	var params v_data.VResetPass
+	bindData(ctx, &params, (&handlers.User{}).ResetPass, fillUser)
 }

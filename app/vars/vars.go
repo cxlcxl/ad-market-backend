@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"bs.mobgi.cc/library/config_interface"
-	myRedis "bs.mobgi.cc/library/redis"
+	"market/library/config_interface"
+	myRedis "market/library/redis"
 	"gorm.io/gorm"
 )
 

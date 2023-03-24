@@ -2,9 +2,9 @@
   <section class="app-main">
     <el-card class="container-card">
       <transition name="fade-transform" mode="out-in">
-        <keep-alive :include="cachedViews">
+<!--        <keep-alive :include="cachedViews">-->
           <router-view :key="key" />
-        </keep-alive>
+<!--        </keep-alive>-->
       </transition>
     </el-card>
   </section>

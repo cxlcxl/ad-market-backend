@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"bs.mobgi.cc/app/model"
-	"bs.mobgi.cc/app/response"
-	"bs.mobgi.cc/app/utils"
-	"bs.mobgi.cc/app/validator/v_data"
-	"bs.mobgi.cc/app/vars"
 	"github.com/gin-gonic/gin"
+	"market/app/model"
+	"market/app/response"
+	"market/app/utils"
+	"market/app/validator/v_data"
+	"market/app/vars"
 	"strconv"
 	"time"
 )
@@ -25,7 +25,7 @@ func (h *Account) AccountList(ctx *gin.Context, p interface{}) {
 	response.Success(ctx, gin.H{
 		"total": total,
 		"list":  acts,
-		"state": vars.CommonState,
+		"state": vars.AccountState,
 	})
 }
 

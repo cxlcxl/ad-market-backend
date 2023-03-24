@@ -1,10 +1,10 @@
 package test
 
 import (
-	"bs.mobgi.cc/app/model"
-	servicereport "bs.mobgi.cc/app/service/report"
-	"bs.mobgi.cc/app/vars"
-	_ "bs.mobgi.cc/bootstrap"
+	"market/app/model"
+	servicereport "market/app/service/report"
+	"market/app/vars"
+	_ "market/bootstrap"
 	"testing"
 )
 

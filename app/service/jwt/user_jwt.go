@@ -5,7 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"time"
 
-	"bs.mobgi.cc/app/vars"
+	"market/app/vars"
 )
 
 type UserTokenInfo struct {

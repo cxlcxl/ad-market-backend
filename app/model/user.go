@@ -4,20 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"time"
 )
 
 type User struct {
 	connectDb
 
-	Id        int64     `json:"id"`
-	Username  string    `json:"username"`               // 用户名
-	Mobile    string    `json:"mobile"`                 // 手机号
-	State     uint8     `json:"state"`                  // 账号状态
-	Secret    string    `json:"-" gorm:"column:secret"` // 密码加密符
-	Pass      string    `json:"-" gorm:"column:pass"`   // 密码
-	CreatedAt time.Time `json:"created_at"`             // 添加时间
-	UpdatedAt time.Time `json:"updated_at"`             // 最后一次修改时间
+	Id       int64  `json:"id"`
+	Username string `json:"username"`               // 用户名
+	Mobile   string `json:"mobile"`                 // 手机号
+	State    uint8  `json:"state"`                  // 账号状态
+	Secret   string `json:"-" gorm:"column:secret"` // 密码加密符
+	Pass     string `json:"-" gorm:"column:pass"`   // 密码
+
+	Timestamp
 }
 
 func (m *User) TableName() string {

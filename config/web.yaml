@@ -11,7 +11,7 @@ Token:
 Mysql:
   Host: "114.116.99.135"
   Port: 21780
-  Database: "site"
+  Database: "ad_market"
   Prefix: ""
   Username: "root"
   Password: "hwecs21780root"

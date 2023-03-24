@@ -1,9 +1,9 @@
 package validator
 
 import (
-	"bs.mobgi.cc/app/handlers"
-	"bs.mobgi.cc/app/validator/v_data"
 	"github.com/gin-gonic/gin"
+	"market/app/handlers"
+	"market/app/validator/v_data"
 )
 
 func (v BsValidator) VAccountList(ctx *gin.Context) {

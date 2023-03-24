@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "bs.mobgi.cc/bootstrap"
-	"bs.mobgi.cc/router"
+	_ "market/bootstrap"
+	"market/router"
 	"log"
 )
 

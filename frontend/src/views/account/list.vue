@@ -3,16 +3,11 @@
     <el-col :span="24" class="search-container">
       <el-form ref="_search" :model="search" inline size="small">
         <el-form-item>
-          <el-input v-model="search.account_name" class="w200" clearable placeholder="账户名" />
+          <el-input v-model="search.mobile" class="w200" clearable placeholder="手机号" />
         </el-form-item>
         <el-form-item>
-          <el-select v-model="search.account_type" class="w130">
-            <el-option label="全部账户类型" :value="0" />
-            <el-option v-for="(key, val) in account_types" :label="key" :value="Number(val)" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-select v-model="search.state" class="w100">
+          <el-select v-model="search.state" class="w120">
+            <el-option label="全部" :value="0" />
             <el-option v-for="(key, val) in accountList.state" :label="key" :value="Number(val)" />
           </el-select>
         </el-form-item>
@@ -22,27 +17,14 @@
       </el-form>
     </el-col>
     <el-col :span="24">
-      <el-button type="primary" icon="el-icon-plus" size="mini" @click="add">添加账户</el-button>
-    </el-col>
-    <el-col :span="24">
-      <el-table v-loading="loadings.pageLoading" :data="accountList.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
+      <el-table v-loading="loadings.pageLoading" :data="accountList.list" highlight-current-row stripe border size="mini">
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column label="账号名称" min-width="150" show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span :class="{'text-success': scope.row.is_auth === 1}">{{ scope.row.account_name }}</span>
-          </template>
+        <el-table-column label="手机号" prop="mobile" width="130" />
+        <el-table-column prop="account_name" label="名称" width="200"/>
+        <el-table-column label="状态" width="130" align="center">
+          <template slot-scope="scope">{{scope.row.state|stateFilter(accountList.state)}}</template>
         </el-table-column>
-        <el-table-column label="账号类型" width="100" align="center" show-overflow-tooltip>
-          <template slot-scope="scope">{{ account_types[scope.row.account_type] }}</template>
-        </el-table-column>
-        <el-table-column prop="advertiser_id" label="广告主ID" width="160" />
-        <el-table-column prop="developer_id" label="开发者ID" width="160" />
-        <el-table-column label="状态" width="80" align="center">
-          <template slot-scope="scope">
-            <span :class="(scope.row.state === 0 ? 'text-error' : '')">{{scope.row.state|stateFilter(accountList.state)}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="ClientID" prop="client_id" width="120" />
+        <el-table-column prop="remark" label="备注"/>
         <el-table-column prop="created_at" label="添加时间" width="140" align="center">
           <template slot-scope="scope">{{scope.row.created_at|timeFormat}}</template>
         </el-table-column>
@@ -62,23 +44,20 @@
     <el-col :span="24" style="margin-top: 15px;">
       <page ref="page" :page="search.page" :total="accountList.total" @current-change="handlePage" @size-change="handlePageSize" />
 
-      <account-create ref="accountCreate" @success="getAccountList" :account-types="account_types" />
-      <account-update ref="accountUpdate" @success="getAccountList" :account-types="account_types" />
+      <account-update ref="accountUpdate" @success="getAccountList" :account-state="accountList.state" />
     </el-col>
   </el-row>
 </template>
 
 <script>
 import { accountList, accountAuth, refreshAuth } from "@a/account"
-import AccountCreate from "./components/add-act"
 import AccountUpdate from "./components/edit-act"
 import Page from "@c/Page"
 import { parseTime } from "@/utils"
 
 export default {
-  name: "AccountList",
+  // name: "AccountList",
   components: {
-    AccountCreate,
     AccountUpdate,
     Page,
   },
@@ -95,10 +74,8 @@ export default {
       },
       roles: [],
       search: {
-        account_id: "",
-        account_name: "",
-        account_type: 0,
-        state: 1,
+        mobile: "",
+        state: 0,
         page: 1,
         page_size: 10,
       },

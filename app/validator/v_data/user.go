@@ -1,5 +1,7 @@
 package v_data
 
+import "market/app/vars"
+
 type VUserList struct {
 	Username string `json:"username" form:"username"`
 	Mobile   string `json:"mobile" form:"mobile"`
@@ -19,7 +21,21 @@ type VUserUpdate struct {
 	VUserCreate
 }
 
+type VSelfUpdate struct {
+	Username string `json:"username" form:"username" binding:"required"`
+	Mobile   string `json:"mobile" form:"mobile" binding:"required"`
+
+	User *vars.LoginUser
+}
+
 type VLogin struct {
-	Mobile string `json:"mobile" binding:"required,email"`
+	Mobile string `json:"mobile" binding:"required,mobile"`
 	Pass   string `json:"pass" binding:"required,pass"`
+}
+
+type VResetPass struct {
+	OldPass          string `json:"old_pass" binding:"required,pass"`
+	Pass             string `json:"pass" binding:"required,pass"`
+	ConfirmationPass string `json:"confirmation_pass" binding:"required,pass"`
+	User             *vars.LoginUser
 }

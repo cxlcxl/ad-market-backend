@@ -1,7 +1,7 @@
 package response
 
 import (
-	"bs.mobgi.cc/app/vars"
+	"market/app/vars"
 	"fmt"
 	"net/http"
 

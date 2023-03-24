@@ -8,7 +8,7 @@ import getPageTitle from "@/utils/get-page-title";
 
 NProgress.configure({ showSpinner: false });
 
-const whiteList = ["/login", "/auth-redirect", "/sso/callback"];
+const whiteList = ["/login"];
 
 router.beforeEach(async (to, from, next) => {
   NProgress.start();
@@ -20,24 +20,16 @@ router.beforeEach(async (to, from, next) => {
       next({ path: "/" });
       NProgress.done();
     } else {
-      const hasRoles = store.getters.roles && store.getters.roles.length > 0;
-      if (hasRoles) {
-        next();
+      const user_id = store.getters.user_id
+      if (user_id > 0) {
+        next()
       } else {
         try {
-          const { roles, permissions } = await store.dispatch("user/getInfo");
-          const accessRoutes = await store.dispatch(
-            "permission/generateRoutes",
-            {
-              roles,
-              permissions,
-            }
-          );
-          router.addRoutes(accessRoutes);
+          await store.dispatch("user/getInfo");
+          await store.dispatch("permission/generateRoutes");
 
           next({ ...to, replace: true });
         } catch (error) {
-          console.log(error);
           await store.dispatch("user/resetToken");
           Message.error(error || "Has Error");
           next(`/login`);

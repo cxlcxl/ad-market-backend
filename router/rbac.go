@@ -1,10 +1,10 @@
 package router
 
 import (
-	"bs.mobgi.cc/app/handlers"
-	"bs.mobgi.cc/app/middleware"
-	"bs.mobgi.cc/app/validator"
 	"github.com/gin-gonic/gin"
+	"market/app/handlers"
+	"market/app/middleware"
+	"market/app/validator"
 )
 
 func initRbacApis(r *gin.RouterGroup) {
@@ -12,8 +12,10 @@ func initRbacApis(r *gin.RouterGroup) {
 
 	r.Use(middleware.CheckUserLogin())
 	{
+		r.POST("/self/update", (validator.BsValidator{}).VSelfUpdate)
 		r.GET("/profile", (&handlers.User{}).Profile) //个人信息
 		r.POST("/logout", (&handlers.User{}).Logout)
+		r.POST("/reset-pass", (validator.BsValidator{}).VResetPass)
 
 		u := r.Group("/user")
 		{

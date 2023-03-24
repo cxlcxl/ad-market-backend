@@ -1,11 +1,11 @@
 package bootstrap
 
 import (
-	validator2 "bs.mobgi.cc/app/validator"
-	"bs.mobgi.cc/app/vars"
-	"bs.mobgi.cc/library/config"
-	myGorm "bs.mobgi.cc/library/gorm"
-	"bs.mobgi.cc/library/redis"
+	validator2 "market/app/validator"
+	"market/app/vars"
+	"market/library/config"
+	myGorm "market/library/gorm"
+	"market/library/redis"
 	"log"
 	"os"
 )

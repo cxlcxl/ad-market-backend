@@ -1,22 +1,23 @@
 package router
 
 import (
-	"bs.mobgi.cc/app/vars"
 	"github.com/gin-gonic/gin"
+	"market/app/vars"
 	"net/http"
 )
 
 func Router() error {
 	r := gin.Default()
 
-	if vars.YmlConfig.GetBool("HttpServer.AllowCrossDomain") {
-		r.Use(corsNext())
-	}
+	//if vars.YmlConfig.GetBool("HttpServer.AllowCrossDomain") {
+	r.Use(corsNext())
+	//}
 
 	group := r.Group(vars.ApiPrefix)
 	{
 		initRbacApis(group)
 		initAccountApis(group)
+		initListenApis(group)
 	}
 
 	return r.Run(vars.YmlConfig.GetString("HttpServer.Port"))

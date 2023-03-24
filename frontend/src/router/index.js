@@ -4,11 +4,6 @@ import Router from "vue-router";
 Vue.use(Router);
 
 import Layout from "@/layout";
-import RBACRouter from "./modules/rbac";
-import OthersRouter from "./modules/others";
-import MarketingRouter from "./modules/marketing";
-import AnalysisRouter from "./modules/analysis";
-import SettingsRouter from "./modules/settings";
 
 export const constantRoutes = [
   {
@@ -25,16 +20,6 @@ export const constantRoutes = [
   {
     path: "/login",
     component: () => import("@v/login/index"),
-    hidden: true,
-  },
-  {
-    path: "/sso/callback",
-    component: () => import("@v/login/sso-callback"),
-    hidden: true,
-  },
-  {
-    path: "/auth-redirect",
-    component: () => import("@v/login/auth-redirect"),
     hidden: true,
   },
   {
@@ -65,6 +50,48 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/other",
+    component: Layout,
+    redirect: "/other/account",
+    meta: { title: "商机", icon: "el-icon-user" },
+    children: [
+      {
+        path: "account",
+        name: "AccountList",
+        component: () => import("@v/account/list"),
+        meta: { title: "商机" },
+      },
+    ],
+  },
+  {
+    path: "/listen",
+    component: Layout,
+    redirect: "/listen/list",
+    meta: { title: "课程", icon: "el-icon-collection" },
+    children: [
+      {
+        path: "list",
+        name: "ListenList",
+        component: () => import("@v/listen/list"),
+        meta: { title: "课程列表"},
+      },
+    ],
+  },
+  {
+    path: "/rbac",
+    component: Layout,
+    redirect: "/rbac/user",
+    meta: { title: "用户权限", icon: "el-icon-unlock" },
+    children: [
+      {
+        path: "user",
+        name: "UserList",
+        component: () => import("@v/rbac/user"),
+        meta: { title: "后台用户" },
+      },
+    ],
+  },
+  {
     path: "/profile",
     component: Layout,
     hidden: true,
@@ -77,23 +104,13 @@ export const constantRoutes = [
       },
     ],
   },
-  // http://localhost:19527/marketing/callback
-  {
-    path: "/marketing/callback",
-    component: () => import("@v/marketing/callback"),
-    hidden: true,
-  },
+  { path: "*", redirect: "/404", hidden: true },
 ];
 
 // 路由规则：
 // 权限控制为 meta 中的 auth 属性，填写规则：后端路由去掉前缀 [/api/]
 // 如果未设置 auth 属性，表示无需权限都可以访问
 export const asyncRoutes = [
-  AnalysisRouter,
-  MarketingRouter,
-  OthersRouter,
-  RBACRouter,
-  SettingsRouter,
   { path: "*", redirect: "/404", hidden: true },
 ];
 

@@ -3,9 +3,6 @@
     <el-form-item label="用户名" prop="username">
       <el-input v-model.trim="user.username"/>
     </el-form-item>
-    <el-form-item label="邮箱" prop="email">
-      <el-input v-model.trim="user.email"/>
-    </el-form-item>
     <el-form-item label="手机号" prop="mobile">
       <el-input v-model.trim="user.mobile"/>
     </el-form-item>
@@ -25,12 +22,10 @@
         loading: false,
         user: {
           username: '',
-          email: '',
           mobile: '',
         },
         formRules: {
           username: {required: true, message: '请填写用户名'},
-          email: [{required: true, message: '请填写邮箱号码'}, {type: 'email', message: '请填写正确的邮箱号'}],
           mobile: {required: true, message: '请填写手机号码'},
         }
       }
@@ -42,7 +37,6 @@
       getUserInfo() {
         getInfo().then(res => {
           this.$set(this.user, 'username', res.data.username)
-          this.$set(this.user, 'email', res.data.email)
           this.$set(this.user, 'mobile', res.data.mobile)
         }).catch(() => {})
       },

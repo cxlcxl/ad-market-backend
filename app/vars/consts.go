@@ -34,6 +34,12 @@ const (
 	CommonStateValid
 )
 
+const (
+	AccountStateNoPaid = iota + 1
+	AccountStatePaid
+	AccountStateAdded
+)
+
 var (
 	ResponseMsg = map[int]string{
 		ResponseCodeOk:           "OK",
@@ -50,5 +56,11 @@ var (
 	CommonState = map[int]string{
 		CommonStateVoid:  "停用",
 		CommonStateValid: "正常",
+	}
+	// AccountState 账号状态
+	AccountState = map[int]string{
+		AccountStateNoPaid: "认证未支付",
+		AccountStatePaid:   "认证已支付",
+		AccountStateAdded:  "已加微信",
 	}
 )

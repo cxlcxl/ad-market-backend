@@ -1,8 +1,8 @@
 package router
 
 import (
-	"bs.mobgi.cc/app/middleware"
-	"bs.mobgi.cc/app/validator"
+	"market/app/middleware"
+	"market/app/validator"
 	"github.com/gin-gonic/gin"
 )
 
