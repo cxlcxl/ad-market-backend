@@ -88,16 +88,6 @@ func Password(pass, secret string) string {
 	return strings.ToUpper(MD5(base64.StdEncoding.EncodeToString([]byte(secret + pass + secret))))
 }
 
-// InArray 判断是否在数组中
-func InArray[T int64 | string](v T, vs []T) bool {
-	for _, t := range vs {
-		if t == v {
-			return true
-		}
-	}
-	return false
-}
-
 // StringToFloat string to float64
 func StringToFloat(d string) float64 {
 	f, err := strconv.ParseFloat(d, 64)
@@ -123,16 +113,6 @@ func BufferConcat(s []string, seq string) string {
 		buf.WriteString(s[i])
 	}
 	return buf.String()
-}
-
-func WhereIn[T int64 | string](v []T) (string, []interface{}) {
-	conditions := make([]string, len(v))
-	values := make([]interface{}, len(v))
-	for i, t := range v {
-		conditions[i] = "?"
-		values[i] = t
-	}
-	return "(" + strings.Join(conditions, ",") + ")", values
 }
 
 // GenValidateCode 生成短信验证码
