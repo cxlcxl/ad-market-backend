@@ -50,12 +50,17 @@ func (m *Account) AccountList(mobile, accountName string, state uint8, offset, l
 	return
 }
 
-func (m *Account) AccountCreate(act *Account) (err error) {
-	err = m.Table(m.TableName()).Create(act).Error
+func (m *Account) AccountCreate(state int, mobile string) (err error) {
+	err = m.Exec("insert ignore into accounts(mobile, state, created_at) values(?, ?, NOW())", mobile, state).Error
 	return
 }
 
 func (m *Account) AccountUpdate(d map[string]interface{}, id int64) (err error) {
 	err = m.Table(m.TableName()).Where("id = ?", id).Updates(d).Error
+	return
+}
+
+func (m *Account) AccountUpdateByMobile(d map[string]interface{}, mobile string) (err error) {
+	err = m.Table(m.TableName()).Where("mobile = ?", mobile).Updates(d).Error
 	return
 }

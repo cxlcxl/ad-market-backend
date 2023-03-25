@@ -53,13 +53,13 @@ export const constantRoutes = [
     path: "/other",
     component: Layout,
     redirect: "/other/account",
-    meta: { title: "商机", icon: "el-icon-user" },
+    meta: { title: "商机", icon: "el-icon-s-promotion" },
     children: [
       {
         path: "account",
         name: "AccountList",
         component: () => import("@v/account/list"),
-        meta: { title: "商机" },
+        meta: { title: "商机客户" },
       },
     ],
   },
@@ -67,8 +67,14 @@ export const constantRoutes = [
     path: "/listen",
     component: Layout,
     redirect: "/listen/list",
-    meta: { title: "课程", icon: "el-icon-collection" },
+    meta: { title: "课程设置", icon: "el-icon-collection" },
     children: [
+      {
+        path: "images",
+        name: "ListenImg",
+        component: () => import("@v/listen/images"),
+        meta: { title: "课程图上传"},
+      },
       {
         path: "list",
         name: "ListenList",
@@ -81,7 +87,7 @@ export const constantRoutes = [
     path: "/rbac",
     component: Layout,
     redirect: "/rbac/user",
-    meta: { title: "用户权限", icon: "el-icon-unlock" },
+    meta: { title: "用户权限", icon: "el-icon-user" },
     children: [
       {
         path: "user",

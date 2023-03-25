@@ -42,7 +42,7 @@ func (l *Listen) ListenCreate(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VListenCreate)
 	listen := &model.Listen{
 		Title:    params.Title,
-		ImgUrl:   "",
+		ImgUrl:   params.ImgUrl,
 		SubTitle: params.SubTitle,
 		OrderBy:  params.OrderBy,
 		State:    1,
@@ -66,6 +66,7 @@ func (l *Listen) ListenUpdate(ctx *gin.Context, p interface{}) {
 		"order_by":  params.OrderBy,
 		"state":     params.State,
 		"sub_title": params.SubTitle,
+		"img_url":   params.ImgUrl,
 	}
 	lists := make([]*model.ListenList, 0)
 	for _, list := range params.Lists {

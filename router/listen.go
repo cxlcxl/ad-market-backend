@@ -14,4 +14,10 @@ func initListenApis(g *gin.RouterGroup) {
 		group.GET("/:id", (validator.BsValidator{}).VListenInfo)
 		group.GET("/list", (validator.BsValidator{}).VListenList)
 	}
+	asset := g.Group("/asset", middleware.CheckUserLogin())
+	{
+		asset.POST("/upload", (validator.BsValidator{}).VAssetUpload)
+		asset.POST("/delete/:id", (validator.BsValidator{}).VAssetDel)
+		asset.GET("/list", (validator.BsValidator{}).VAssetList)
+	}
 }

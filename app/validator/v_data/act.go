@@ -15,3 +15,12 @@ type VAccountUpdate struct {
 	Remark      string `json:"remark"`
 	State       uint8  `json:"state"`
 }
+
+type VAccountSms struct {
+	Mobile string `json:"mobile" binding:"required,mobile"`
+}
+
+type VAccountSmsValid struct {
+	Mobile string `json:"mobile" binding:"required,mobile"`
+	Code   string `json:"code" binding:"required"`
+}

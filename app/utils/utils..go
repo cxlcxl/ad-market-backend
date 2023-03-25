@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"github.com/shopspring/decimal"
 	"math/rand"
 	"mime/multipart"
@@ -132,4 +133,20 @@ func WhereIn[T int64 | string](v []T) (string, []interface{}) {
 		values[i] = t
 	}
 	return "(" + strings.Join(conditions, ",") + ")", values
+}
+
+// GenValidateCode 生成短信验证码
+func GenValidateCode(width int) (code string, err error) {
+	numeric := [10]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	r := len(numeric)
+	rand.Seed(time.Now().UnixNano())
+
+	var sb strings.Builder
+	for i := 0; i < width; i++ {
+		if _, err = fmt.Fprintf(&sb, "%d", numeric[rand.Intn(r)]); err != nil {
+			return "", err
+		}
+	}
+	code = sb.String()
+	return
 }

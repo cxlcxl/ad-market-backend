@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"market/app/model"
 	"market/app/response"
+	"market/app/service/ali_sms"
 	"market/app/utils"
 	"market/app/validator/v_data"
 	"market/app/vars"
@@ -57,4 +58,26 @@ func (h *Account) AccountUpdate(ctx *gin.Context, p interface{}) {
 		return
 	}
 	response.Success(ctx, nil)
+}
+
+func (h *Account) AccountSms(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VAccountSms)
+	if code, err := ali_sms.BuildAndSend(params.Mobile); err != nil {
+		response.Fail(ctx, "验证码发送失败："+err.Error())
+	} else {
+		response.Success(ctx, gin.H{"code": code})
+	}
+}
+
+func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VAccountSmsValid)
+	if len(params.Code) != 4 {
+		response.Fail(ctx, "验证码错误")
+		return
+	}
+	if err := ali_sms.ValidSmsCode(params.Mobile, params.Code); err != nil {
+		response.Fail(ctx, "验证失败："+err.Error())
+	} else {
+		response.Success(ctx, nil)
+	}
 }

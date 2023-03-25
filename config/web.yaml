@@ -1,4 +1,4 @@
-Debug: true
+Debug: false
 AppName:
 HttpServer:
   Port: ":18081"
@@ -7,6 +7,12 @@ HttpServer:
 Token:
   Sign: "ad-market"
   ExpiresAt: 259200
+
+Sms:
+  AccessKeyId: "LTAICXjZNcsQDGzl"
+  AccessKeySecret: "Oib4uZyQp1e9N5jrBPrKwiZ9wYk43W"
+  TemplateCode: "SMS_117170087"
+  SignName: "程晓良"
 
 Mysql:
   Host: "114.116.99.135"
@@ -40,6 +46,6 @@ Logs:
   Compress: false #日志备份时，是否进行压缩
 
 FileUploadSetting:
-  Size: 500 # 单位 KB
+  Size: 300 # 单位 KB
   UploadPath: "/storage/app/upload"
   ReturnPath: "/web/storage/upload"

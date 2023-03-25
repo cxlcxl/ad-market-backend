@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -74,5 +75,11 @@ func (dr *DBRedis) ExpireTime(key string, t int64) (err error) {
 
 func (dr *DBRedis) ExecRedis(args ...interface{}) (err error) {
 	_, err = dr.Client.Do(dr.ctx, args...).Result()
+	return
+}
+
+func (dr *DBRedis) DelKeys(args ...string) (err error) {
+	i, err := dr.Client.Del(dr.ctx, args...).Result()
+	fmt.Println(i, err)
 	return
 }

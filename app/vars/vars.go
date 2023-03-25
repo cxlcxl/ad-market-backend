@@ -1,14 +1,13 @@
 package vars
 
 import (
-	"github.com/casbin/casbin/v2"
 	"log"
 	"os"
 	"strings"
 
+	"gorm.io/gorm"
 	"market/library/config_interface"
 	myRedis "market/library/redis"
-	"gorm.io/gorm"
 )
 
 var (
@@ -16,7 +15,6 @@ var (
 	DBMysql   *gorm.DB
 	YmlConfig config_interface.YamlConfigInterface
 	DBRedis   *myRedis.DBRedis
-	Casbin    *casbin.SyncedEnforcer
 )
 
 type LoginUser struct {

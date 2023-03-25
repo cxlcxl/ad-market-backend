@@ -1,20 +1,11 @@
 package vars
 
 const (
-	ApiPrefix = "/api"
-
+	ApiPrefix       = "/api"
 	ConfigKeyPrefix = "_ad_market_config_"
 	LoginUserKey    = "ad_market_login_user"
-
-	UserStateValid = 1
-
-	MaxPageSize       uint64 = 100
-	SystemDefaultPass        = "a123456"
-
-	DateTimeFormat = "2006-01-02 15:04:05"
-
-	DateFormat = "2006-01-02"
-	Env        = "dev"
+	DateTimeFormat  = "2006-01-02 15:04:05"
+	DateFormat      = "2006-01-02"
 )
 
 const (
@@ -30,12 +21,8 @@ const (
 )
 
 const (
-	CommonStateVoid = iota
-	CommonStateValid
-)
-
-const (
-	AccountStateNoPaid = iota + 1
+	AccountStateNoAuth = iota + 1
+	AccountStateNoPaid
 	AccountStatePaid
 	AccountStateAdded
 )
@@ -52,15 +39,11 @@ var (
 		ResponseCodeTokenErr:     "TOKEN 错误",
 		ResponseCodeTokenExpire:  "TOKEN 过期",
 	}
-	// CommonState 通用数据库状态字段
-	CommonState = map[int]string{
-		CommonStateVoid:  "停用",
-		CommonStateValid: "正常",
-	}
 	// AccountState 账号状态
 	AccountState = map[int]string{
-		AccountStateNoPaid: "认证未支付",
-		AccountStatePaid:   "认证已支付",
+		AccountStateNoAuth: "未短信认证",
+		AccountStateNoPaid: "已认证未支付",
+		AccountStatePaid:   "已认证已支付",
 		AccountStateAdded:  "已加微信",
 	}
 )

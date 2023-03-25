@@ -4,7 +4,7 @@
     <slot/>
 
     <div slot="footer" class="dialog-footer">
-      <el-button @click="handleCancel" :loading="confirmLoading" icon="el-icon-close">取消</el-button>
+      <el-button @click="handleCancel" :loading="confirmLoading" icon="el-icon-close">{{cancelText}}</el-button>
       <el-button type="primary" @click="handleConfirm" icon="el-icon-check" v-show="confirmText"
                  :loading="confirmLoading">{{confirmText}}</el-button>
       <slot name="operate"/>
@@ -34,7 +34,11 @@
       visible: {
         default: false,
         type: Boolean
-      }
+      },
+      cancelText: {
+        default: "取消",
+        type: String
+      },
     },
     methods: {
       handleCancel() {

@@ -22,6 +22,11 @@
     <el-col :span="24">
       <el-table v-loading="loadings.pageLoading" :data="listenList.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" width="80" align="center" />
+        <el-table-column prop="name" label="图片" width="170">
+          <template slot-scope="scope">
+            <img :src="scope.row.img_url|lsImg" class="list-img"/>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="课程标题"/>
         <el-table-column prop="title" label="小标题"/>
         <el-table-column prop="order_by" label="排序" width="90"/>
@@ -50,6 +55,7 @@
 
 <script>
 import { listenList } from "@a/listen"
+import { assetInfo } from "@a/asset"
 import ListenCreate from "./components/add-listen"
 import ListenUpdate from "./components/edit-listen"
 import Page from "@c/Page"
@@ -80,6 +86,11 @@ export default {
   },
   mounted() {
     this.getList()
+  },
+  filters: {
+    lsImg(code) {
+      return assetInfo+code
+    }
   },
   methods: {
     getList() {
@@ -114,3 +125,10 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  .list-img {
+    max-height: 50px;
+    max-width: 150px;
+  }
+</style>

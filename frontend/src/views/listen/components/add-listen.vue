@@ -4,6 +4,11 @@
     <el-form :model="listenForm" ref="listenForm" label-width="100px" size="small" :rules="listenRules">
       <el-row :gutter="30">
         <el-col :span="12">
+          <el-form-item label="课程图" prop="img_url">
+            <el-input placeholder="请选择课程图" v-model="listenForm.img_url" disabled>
+              <el-button slot="append" icon="el-icon-thumb" @click="selectImg">选择</el-button>
+            </el-input>
+          </el-form-item>
           <el-form-item label="标题" prop="title">
             <el-input v-model="listenForm.title" placeholder="请填写课程标题" />
           </el-form-item>
@@ -24,7 +29,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="5">
-              <el-form-item :prop="'lists.'+idx+'.order_by'" label-width="0">
+              <el-form-item :prop="'lists.'+idx+'.order_by'" label-width="0" :rules="{required: true, message: '请填写排序'}">
                 <el-input-number v-model="ls.order_by" :min="1" :max="9999" :controls="false" style="width: 100%;"/>
               </el-form-item>
             </el-col>
@@ -44,16 +49,19 @@
         </el-col>
       </el-row>
     </el-form>
+
+    <listen-img-select ref="img_select" @handle-select="selectedImg"/>
   </dialog-panel>
 </template>
 
 <script>
   import DialogPanel from "@c/DialogPanel"
   import { listenCreate } from "@a/listen"
+  import ListenImgSelect from "./select-images"
 
   export default {
     components: {
-      DialogPanel,
+      DialogPanel, ListenImgSelect
     },
     data() {
       return {
@@ -62,11 +70,13 @@
         listenForm: {
           id: 0,
           title: "",
+          img_url: "",
           sub_title: "",
           order_by: 99,
           lists: [{title: "", order_by: 1}],
         },
         listenRules: {
+          img_url: { required: true, message: "请选择课程图" },
           title: { required: true, message: "请填写标题" },
           sub_title: { required: true, message: "请填写小标题" },
         },
@@ -86,6 +96,12 @@
       },
       removeOne(idx) {
         this.listenForm.lists.splice(idx, 1)
+      },
+      selectImg() {
+        this.$refs.img_select.initSelect()
+      },
+      selectedImg(v) {
+        this.$set(this.listenForm, "img_url", v)
       },
       save() {
         this.$refs.listenForm.validate((v) => {

@@ -15,6 +15,9 @@ func Router() error {
 
 	group := r.Group(vars.ApiPrefix)
 	{
+		// 开放小程序&页面短信API
+		initFrontV1Apis(group)
+
 		initRbacApis(group)
 		initAccountApis(group)
 		initListenApis(group)
