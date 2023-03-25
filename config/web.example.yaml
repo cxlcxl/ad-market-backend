@@ -9,18 +9,18 @@ Token:
   ExpiresAt: 259200
 
 Sms:
-  AccessKeyId: "LTAICXjZNcsQDGzl"
-  AccessKeySecret: "Oib4uZyQp1e9N5jrBPrKwiZ9wYk43W"
-  TemplateCode: "SMS_117170087"
-  SignName: "程晓良"
+  AccessKeyId: ""
+  AccessKeySecret: ""
+  TemplateCode: ""
+  SignName: ""
 
 Mysql:
-  Host: "114.116.99.135"
-  Port: 21780
-  Database: "ad_market"
+  Host: ""
+  Port: 3306
+  Database: ""
   Prefix: ""
-  Username: "root"
-  Password: "hwecs21780root"
+  Username: ""
+  Password: ""
   Charset: "utf8mb4"
   SetMaxIdleConns: 10
   SetMaxOpenConns: 128
