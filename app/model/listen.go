@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"market/app/cache"
 )
 
 type Listen struct {
@@ -13,6 +14,7 @@ type Listen struct {
 	SubTitle string        `json:"sub_title"`
 	OrderBy  int           `json:"order_by"`
 	State    uint8         `json:"state"`
+	Amt      int           `json:"amt"`
 	Lists    []*ListenList `json:"lists" gorm:"-"`
 }
 
@@ -74,5 +76,23 @@ func (m *Listen) ListenUpdate(d map[string]interface{}, id int64, lists []*Liste
 		return nil
 	})
 
+	return
+}
+
+///////// API ////////////
+
+func (m *Listen) ApiListenList() (ls []*Listen, err error) {
+	err = cache.New(m.DB).Query("db:listens", &ls, func(db *gorm.DB, v interface{}) error {
+		return db.Table(m.TableName()).Where("state = 1").Select("id,title,sub_title,img_url").
+			Order("order_by asc, id desc").Find(v).Error
+	})
+
+	return
+}
+
+func (m *Listen) ApiFindListenById(id int64) (lsn *Listen, err error) {
+	err = cache.New(m.DB).QueryRow("db:listen", &lsn, id, func(db *gorm.DB, v interface{}, id interface{}) error {
+		return db.Table(m.TableName()).Where("id = ?", id).First(v).Error
+	})
 	return
 }

@@ -15,12 +15,12 @@ type Listen struct{}
 func (l *Listen) ListenList(ctx *gin.Context, p interface{}) {
 	var params = p.(*v_data.VListenList)
 	offset := utils.GetPages(params.Page, params.PageSize)
-	users, total, err := model.NewListen(vars.DBMysql).ListenList(params.Title, params.State, offset, params.PageSize)
+	listens, total, err := model.NewListen(vars.DBMysql).ListenList(params.Title, params.State, offset, params.PageSize)
 	if err != nil {
 		response.Fail(ctx, "查询错误: "+err.Error())
 		return
 	}
-	response.Success(ctx, gin.H{"total": total, "list": users})
+	response.Success(ctx, gin.H{"total": total, "list": listens})
 }
 
 func (l *Listen) ListenInfo(ctx *gin.Context, v string) {
@@ -45,6 +45,7 @@ func (l *Listen) ListenCreate(ctx *gin.Context, p interface{}) {
 		ImgUrl:   params.ImgUrl,
 		SubTitle: params.SubTitle,
 		OrderBy:  params.OrderBy,
+		Amt:      params.Amt,
 		State:    1,
 	}
 	lists := make([]*model.ListenList, 0)
@@ -67,6 +68,7 @@ func (l *Listen) ListenUpdate(ctx *gin.Context, p interface{}) {
 		"state":     params.State,
 		"sub_title": params.SubTitle,
 		"img_url":   params.ImgUrl,
+		"amt":       params.Amt,
 	}
 	lists := make([]*model.ListenList, 0)
 	for _, list := range params.Lists {
@@ -78,4 +80,29 @@ func (l *Listen) ListenUpdate(ctx *gin.Context, p interface{}) {
 		return
 	}
 	response.Success(ctx, nil)
+}
+
+func (l *Listen) Listen(ctx *gin.Context) {
+	listens, err := model.NewListen(vars.DBMysql).ApiListenList()
+	if err != nil {
+		response.Fail(ctx, "查询错误: "+err.Error())
+		return
+	}
+	response.Success(ctx, listens)
+}
+
+func (l *Listen) ApiListenInfo(ctx *gin.Context) {
+	v := ctx.Param("id")
+	id, err := strconv.ParseInt(v, 0, 64)
+	if err != nil {
+		response.Fail(ctx, "参数错误")
+		return
+	}
+	listen, err := model.NewListen(vars.DBMysql).ApiFindListenById(id)
+	if err != nil {
+		response.Fail(ctx, "请求错误："+err.Error())
+		return
+	}
+	listen.Lists = model.NewListenList(vars.DBMysql).ApiFindListByListenId(id)
+	response.Success(ctx, listen)
 }

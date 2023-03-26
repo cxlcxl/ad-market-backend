@@ -4,7 +4,10 @@
                 :confirm-loading="loading" width="700px">
     <el-form :model="assetForm" ref="assetForm" label-width="110px" size="mini">
       <el-form-item label="上传提示">
-        需设置名称可直接重命名图片文件，如图片过大可在 <a href="https://tinypng.com/" target="_blank" style="color: #1890ff;">此站</a> 压缩
+        <p>1. 以图片文件命名</p>
+        <p>2. 图片过大可在 <a href="https://tinypng.com/" target="_blank" style="color: #1890ff;">此站</a> 压缩</p>
+        <p class="text-error">3. 小程序主页课程列表图要求尺寸：500*300</p>
+        <p>4. 其他图片尺寸按具体位置要求上传（配置列表）</p>
       </el-form-item>
       <el-form-item label="选择图片素材" prop="assets" :rules="{required: true}">
         <el-upload :action="uploadUrl" :headers="headers" multiple :limit="5" ref="assetUpload"
@@ -14,7 +17,7 @@
                    :accept="accepts"
                    :on-error="uploadErr"
                    :on-success="uploadSuccess">
-          <el-button slot="trigger" type="primary" plain icon="el-icon-plus">选取文件（单图 300 KB内，一次性最大上传 5 张）</el-button>
+          <el-button slot="trigger" type="primary" plain icon="el-icon-plus">选取文件（单图 100 KB内，一次性最大上传 5 张）</el-button>
         </el-upload>
       </el-form-item>
     </el-form>
@@ -93,7 +96,7 @@
         this.$emit('upload-success')
       },
       overLimit() {
-        this.$message.error("最多一次选择 10 个素材")
+        this.$message.error("最多一次选择 5 个素材")
       }
     }
   }

@@ -15,7 +15,7 @@
     </el-col>
     <el-col :span="24">
       <el-table v-loading="loading" :data="assets.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
-        <el-table-column prop="id" label="ID" width="80" align="center" />
+        <el-table-column prop="f_code" label="展示 ID" width="260" align="center" />
         <el-table-column prop="name" label="图片">
           <template slot-scope="scope">
             <img :src="scope.row.f_code|lsImg" class="list-img"/>

@@ -1,11 +1,15 @@
 <template>
   <dialog-panel title="添加课程" confirm-text="保存" :visible="visible" @cancel="cancel" @confirm="save"
-                :confirm-loading="loading" width="800px">
+                :confirm-loading="loading" width="900px">
     <el-form :model="listenForm" ref="listenForm" label-width="100px" size="small" :rules="listenRules">
       <el-row :gutter="30">
+        <el-col :span="24" style="margin-bottom: 15px;">
+          <p class="lesson-img-tip text-primary">课程图填写方式 1：点击文本框右侧的选择按钮，直接选择本机上传的图片（本机图选择后不可改动 图片 ID）</p>
+          <p class="lesson-img-tip text-primary">课程图填写方式 2：填写以 http 或 https 开头的图片链接（本机图片访问慢时可以将图片放 CDN 以此方式填写）</p>
+        </el-col>
         <el-col :span="12">
           <el-form-item label="课程图" prop="img_url">
-            <el-input placeholder="请选择课程图" v-model="listenForm.img_url" disabled>
+            <el-input placeholder="请填写课程图" v-model="listenForm.img_url">
               <el-button slot="append" icon="el-icon-thumb" @click="selectImg">选择</el-button>
             </el-input>
           </el-form-item>
@@ -14,6 +18,9 @@
           </el-form-item>
           <el-form-item label="小标题" prop="sub_title">
             <el-input v-model="listenForm.sub_title" placeholder="请填写课程小标题" />
+          </el-form-item>
+          <el-form-item label="金额" prop="amt">
+            <el-input-number v-model="listenForm.amt" :min="1" :max="99999" class="w200"/>
           </el-form-item>
           <el-form-item label="排序" prop="order_by">
             <el-input-number v-model="listenForm.order_by" :min="1" :max="9999"/>
@@ -58,12 +65,20 @@
   import DialogPanel from "@c/DialogPanel"
   import { listenCreate } from "@a/listen"
   import ListenImgSelect from "./select-images"
+  import { validURL } from '@/utils/validate'
 
   export default {
     components: {
       DialogPanel, ListenImgSelect
     },
     data() {
+      const validImgUrl = (rule, value, callback) => {
+        if (/^[a-z0-9]{32}$/.test(value) || validURL(value)) {
+          callback()
+        } else {
+          callback(new Error("请填写正确的课程图地址"))
+        }
+      }
       return {
         visible: false,
         loading: false,
@@ -73,11 +88,13 @@
           img_url: "",
           sub_title: "",
           order_by: 99,
+          amt: 9999,
           lists: [{title: "", order_by: 1}],
         },
         listenRules: {
-          img_url: { required: true, message: "请选择课程图" },
+          img_url: [{ required: true, message: "请填写课程图" }, {validator: validImgUrl}],
           title: { required: true, message: "请填写标题" },
+          amt: { required: true, message: "请填写金额" },
           sub_title: { required: true, message: "请填写小标题" },
         },
       }
@@ -127,6 +144,10 @@
 </script>
 
 <style lang="less">
+  .lesson-img-tip {
+    height: 25px;
+    line-height: 25px;
+  }
   .list-box {
     border-left: 1px solid #DCDFE6;
     max-height: 400px;

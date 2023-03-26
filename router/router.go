@@ -21,6 +21,7 @@ func Router() error {
 		initRbacApis(group)
 		initAccountApis(group)
 		initListenApis(group)
+		initConfigApis(group)
 	}
 
 	return r.Run(vars.YmlConfig.GetString("HttpServer.Port"))

@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"market/app/cache"
 )
 
 type ListenList struct {
@@ -33,5 +34,12 @@ func (m *ListenList) FindListByListenId(listenId int64) (lists []*ListenList) {
 
 func (m *ListenList) DeleteByListenId(listenId int64) (err error) {
 	err = m.Exec("delete from listen_lists where listen_id = ?", listenId).Error
+	return
+}
+
+func (m *ListenList) ApiFindListByListenId(listenId int64) (lists []*ListenList) {
+	_ = cache.New(m.DB).QueryRow("", &lists, listenId, func(db *gorm.DB, v interface{}, id interface{}) error {
+		return db.Table(m.TableName()).Where("listen_id = ?", id).Order("order_by asc").Find(v).Error
+	})
 	return
 }

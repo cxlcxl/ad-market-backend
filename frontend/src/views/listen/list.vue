@@ -29,6 +29,7 @@
         </el-table-column>
         <el-table-column prop="title" label="课程标题"/>
         <el-table-column prop="title" label="小标题"/>
+        <el-table-column prop="amt" label="金额" width="100" align="right"/>
         <el-table-column prop="order_by" label="排序" width="90"/>
         <el-table-column prop="state" label="是否展示" width="90">
           <template slot-scope="scope">
@@ -59,6 +60,7 @@ import { assetInfo } from "@a/asset"
 import ListenCreate from "./components/add-listen"
 import ListenUpdate from "./components/edit-listen"
 import Page from "@c/Page"
+import { validURL } from '@/utils/validate'
 
 export default {
   // name: 'ListenList',
@@ -89,7 +91,11 @@ export default {
   },
   filters: {
     lsImg(code) {
-      return assetInfo+code
+      if (/^[a-z0-9]{32}$/.test(code)) {
+        return assetInfo + code
+      } else {
+        return code
+      }
     }
   },
   methods: {

@@ -25,6 +25,9 @@ func (l *Asset) AssetList(ctx *gin.Context, p interface{}) {
 }
 
 func (l *Asset) VAsset(ctx *gin.Context, v string) {
+	if len(v) != 32 {
+		return
+	}
 	filePath := model.NewListenImg(vars.DBMysql).FindImgByCode(v)
 	ctx.File(vars.BasePath + filePath)
 }

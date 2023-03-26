@@ -98,6 +98,20 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/conf",
+    component: Layout,
+    redirect: "/conf/list",
+    meta: { title: "配置", icon: "el-icon-setting" },
+    children: [
+      {
+        path: "list",
+        name: "ConfigList",
+        component: () => import("@v/config/list"),
+        meta: { title: "配置列表" },
+      },
+    ],
+  },
+  {
     path: "/profile",
     component: Layout,
     hidden: true,

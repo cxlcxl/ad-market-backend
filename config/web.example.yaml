@@ -46,6 +46,11 @@ Logs:
   Compress: false #日志备份时，是否进行压缩
 
 FileUploadSetting:
-  Size: 300 # 单位 KB
+  Size: 100 # 单位 KB
   UploadPath: "/storage/app/upload"
   ReturnPath: "/web/storage/upload"
+
+XCXLogin:
+  Url: "https://api.weixin.qq.com/sns/jscode2session"
+  AppId: ""
+  Secret: ""
