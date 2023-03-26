@@ -50,7 +50,8 @@ FileUploadSetting:
   UploadPath: "/storage/app/upload"
   ReturnPath: "/web/storage/upload"
 
-XCXLogin:
+# https://mp.weixin.qq.com/wxamp/devprofile/get_profile?token=138641618&lang=zh_CN
+XCXLogin: # 参数在：开发 ->开发者管理 -> 开发设置中
   Url: "https://api.weixin.qq.com/sns/jscode2session"
   AppId: ""
   Secret: ""
