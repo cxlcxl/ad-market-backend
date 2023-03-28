@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"market/app/model"
 	"market/app/response"
@@ -65,7 +66,9 @@ func (h *Account) AccountSms(ctx *gin.Context, p interface{}) {
 	if code, err := ali_sms.BuildAndSend(params.Mobile); err != nil {
 		response.Fail(ctx, "验证码发送失败："+err.Error())
 	} else {
-		response.Success(ctx, gin.H{"code": code})
+		fmt.Println("生成了验证码", code)
+		// gin.H{"code": code}
+		response.Success(ctx, nil)
 	}
 }
 
