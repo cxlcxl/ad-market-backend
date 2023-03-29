@@ -26,10 +26,15 @@ func (h *Api) Login(ctx *gin.Context, p interface{}) {
 	secret := vars.YmlConfig.GetString("XCXLogin.Secret")
 	data := map[string]string{"appid": appId, "secret": secret, "js_code": params.Code, "grant_type": "authorization_code"}
 	var res ApiLoginResponse
-	if err := curl.New(xcxLoginUrl).QueryData(data).Request(&res, curl.JsonHeader()); err != nil {
+	queryParams := curl.HttpBuildQuery(data)
+	xcxLoginUrl = fmt.Sprintf("%s?%s", xcxLoginUrl, queryParams)
+	if err := curl.New(xcxLoginUrl).Request(&res, curl.JsonHeader()); err != nil {
 		response.Fail(ctx, "登陆接口调用失败："+err.Error())
 	} else {
-		fmt.Println(res, data)
+		fmt.Println(res, res.OpenId)
+		if res.ErrCode == 0 {
+
+		}
 		response.Success(ctx, res)
 	}
 }

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/base64"
 	"market/app/response"
 	"market/app/service/jwt"
 	"market/app/utils"
@@ -70,7 +71,11 @@ func CheckApiSecret() gin.HandlerFunc {
 
 func checkSecret(s string) bool {
 	appSecret := vars.YmlConfig.GetString("AppSecret")
-	ds, err := utils.AesDecrypt([]byte(s), []byte(appSecret))
+	decodeString, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return false
+	}
+	ds, err := utils.AesDecrypt(decodeString, []byte(appSecret))
 	if err != nil {
 		return false
 	}
