@@ -1,13 +1,15 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"market/app/handlers"
+	"market/app/middleware"
 	"market/app/validator"
+
+	"github.com/gin-gonic/gin"
 )
 
 func initFrontV1Apis(g *gin.RouterGroup) {
-	group := g.Group("/v1")
+	group := g.Group("/v1", middleware.CheckApiSecret())
 	{
 		group.POST("/login", (validator.BsValidator{}).VApiLogin)
 

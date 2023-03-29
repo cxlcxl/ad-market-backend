@@ -1,5 +1,6 @@
 Debug: false
 AppName:
+AppSecret: ""
 HttpServer:
   Port: ":18081"
   AllowCrossDomain: true # 是否允许跨域
