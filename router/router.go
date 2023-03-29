@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"market/app/validator"
 	"market/app/vars"
 	"net/http"
 )
@@ -15,6 +16,7 @@ func Router() error {
 
 	group := r.Group(vars.ApiPrefix)
 	{
+		group.POST("/wxpay/action", (validator.BsValidator{}).VApiWxPayAction)
 		// 开放小程序&页面短信API
 		initFrontV1Apis(group)
 

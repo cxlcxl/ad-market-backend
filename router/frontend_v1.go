@@ -11,6 +11,8 @@ import (
 func initFrontV1Apis(g *gin.RouterGroup) {
 	group := g.Group("/v1", middleware.CheckApiSecret())
 	{
+		group.POST("/pay", (validator.BsValidator{}).VApiOrder)
+
 		group.POST("/login", (validator.BsValidator{}).VApiLogin)
 
 		group.POST("/sms", (validator.BsValidator{}).VAccountSms)

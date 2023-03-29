@@ -1,8 +1,8 @@
 package response
 
 import (
-	"market/app/vars"
 	"fmt"
+	"market/app/vars"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -48,4 +48,19 @@ func Fail(c *gin.Context, msg string) {
 // TokenExpired Token 过期
 func TokenExpired(c *gin.Context) {
 	ReturnJson(c, http.StatusBadRequest, 400, "token expired", "")
+}
+
+func PaySuccess(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS",
+		"message": "",
+	})
+	c.Abort()
+}
+func PayFail(c *gin.Context) {
+	c.JSON(http.StatusBadGateway, gin.H{
+		"code":    "FAIL",
+		"message": "失败",
+	})
+	c.Abort()
 }

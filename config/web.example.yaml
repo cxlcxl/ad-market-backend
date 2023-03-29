@@ -56,3 +56,13 @@ XCXLogin: # 参数在：开发 ->开发者管理 -> 开发设置中
   Url: "https://api.weixin.qq.com/sns/jscode2session"
   AppId: ""
   Secret: ""
+
+WxPay:
+  AppId: ""
+  Mchid: ""
+  Amount: 100 # 订单金额￥1元整，单位（分）
+  Desc: "天创跨境-体验课"
+  NotifyUrl: ""
+  ActionKey: ""
+  H5:
+    Order: "https://api.mch.weixin.qq.com/v3/pay/transactions/h5"
