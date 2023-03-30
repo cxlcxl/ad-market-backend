@@ -1,6 +1,7 @@
 package servicepayment
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -15,6 +16,7 @@ import (
 	"market/app/model"
 	"market/app/utils"
 	"market/app/vars"
+	"market/library/curl"
 	"time"
 )
 
@@ -54,36 +56,47 @@ type PayResBody struct {
 	Value    string `json:"value"`
 }
 
+const (
+	// NonceSymbols 随机字符串可用字符集
+	NonceSymbols = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// NonceLength 随机字符串的长度
+	NonceLength = 32
+)
+
 // UserOrder 用户下单
 func UserOrder(ctx *gin.Context, mobile string) (*PayResponse, error) {
 	order, err := buildLocalOrder(mobile)
 	if err != nil {
 		return nil, err
 	}
-	wxPayOrder(ctx, order.OutTradeNo, ctx.ClientIP(), int64(order.Amt))
-	//mchId := vars.YmlConfig.GetString("WxPay.Mchid")
-	//var data = &PayRequest{
-	//	AppId:       vars.YmlConfig.GetString("WxPay.AppId"),
-	//	Mchid:       mchId,
-	//	Description: vars.YmlConfig.GetString("WxPay.Desc"),
-	//	OurTradeNo:  order.OutTradeNo,
-	//	NotifyUrl:   vars.YmlConfig.GetString("WxPay.NotifyUrl"),
-	//	Amount:      PayAmt{Total: order.Amt, Currency: "CNY"},
-	//	SceneInfo:   Scene{PayerClientIp: ip, H5Info: H5Info{Type: "Wap"}},
-	//}
-	//
-	//orderUrl := vars.YmlConfig.GetString("WxPay.H5.Order")
-	//c, err := curl.New(orderUrl).Debug(true).ResBody(true).Post().JsonData(data)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//var res PayResponse
-	//sign := h5OrderSign(mchId)
-	//err = c.Request(&res, curl.JsonHeader(), curl.Accept(), curl.Authorization(sign))
-	//if err != nil {
-	//	return nil, err
-	//}
-	return nil, nil
+	// 微信提供的包
+	//wxPayOrder(ctx, order.OutTradeNo, ctx.ClientIP(), int64(order.Amt))
+
+	mchId := vars.YmlConfig.GetString("WxPay.Mchid")
+	var data = &PayRequest{
+		AppId:       vars.YmlConfig.GetString("WxPay.AppId"),
+		Mchid:       mchId,
+		Description: vars.YmlConfig.GetString("WxPay.Desc"),
+		OurTradeNo:  order.OutTradeNo,
+		NotifyUrl:   vars.YmlConfig.GetString("WxPay.NotifyUrl"),
+		Amount:      PayAmt{Total: order.Amt, Currency: "CNY"},
+		SceneInfo:   Scene{PayerClientIp: ctx.ClientIP(), H5Info: H5Info{Type: "Wap"}},
+	}
+	sign, err := h5OrderSign(mchId)
+	if err != nil {
+		return nil, err
+	}
+	orderUrl := vars.YmlConfig.GetString("WxPay.H5.Order")
+	c, err := curl.New(orderUrl).Debug(true).ResBody(true).Post().JsonData(data)
+	if err != nil {
+		return nil, err
+	}
+	var res PayResponse
+	err = c.Request(&res, curl.JsonHeader(), curl.Accept(), curl.Authorization(sign))
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 func buildLocalOrder(mobile string) (*model.Order, error) {
@@ -101,17 +114,34 @@ func buildLocalOrder(mobile string) (*model.Order, error) {
 	return order, err
 }
 
-func h5OrderSign(mchId string) string {
+// 生成一个长度为 NonceLength 的随机字符串（只包含大小写字母与数字）
+func generateNonce() (string, error) {
+	bytes := make([]byte, NonceLength)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	symbolsByteLength := byte(len(NonceSymbols))
+	for i, b := range bytes {
+		bytes[i] = NonceSymbols[b%symbolsByteLength]
+	}
+	return string(bytes), nil
+}
+
+func h5OrderSign(mchId string) (string, error) {
 	// serial_no 微信商户 API 证书
 	// signature 签名
 	// nonce_str 请求随机串
 	timestamp := time.Now().Unix()
-	nonce := ""
+	nonce, err := generateNonce()
+	if err != nil {
+		return "", err
+	}
 	sign := utils.Base64(fmt.Sprintf("GET\n/v3/certificates\n%d\n%s\n\n", timestamp, nonce))
 	return fmt.Sprintf(
 		"WECHATPAY2-SHA256-RSA2048 mchid=\"%s\",nonce_str=\"%s\",timestamp=\"%d\",serial_no=\"%s\",signature=\"%s\"",
 		mchId, nonce, timestamp, vars.YmlConfig.GetString("WxPay.SerialNo"), sign,
-	)
+	), nil
 }
 
 // ActionOrder 异步回调 TODO
