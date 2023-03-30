@@ -10,6 +10,7 @@ import (
 
 func initFrontV1Apis(g *gin.RouterGroup) {
 	g.GET("/v1/asset/:code", (validator.BsValidator{}).VAsset)
+
 	group := g.Group("/v1", middleware.CheckApiSecret()) //
 	{
 		group.POST("/pay", (validator.BsValidator{}).VApiOrder)
@@ -19,8 +20,8 @@ func initFrontV1Apis(g *gin.RouterGroup) {
 		group.POST("/sms", (validator.BsValidator{}).VAccountSms)
 		group.POST("/sms-valid", (validator.BsValidator{}).VAccountSmsValid)
 
-		group.GET("/listen", (&handlers.Listen{}).Listen)
-		group.GET("/listen/:id", (&handlers.Listen{}).ApiListenInfo)
+		group.GET("/lesson", (&handlers.Lesson{}).Lesson)
+		group.GET("/lesson/:id", (&handlers.Lesson{}).ApiLessonInfo)
 
 		group.GET("/config", (&handlers.Config{}).ApiFindKey)
 		group.GET("/configs", (&handlers.Config{}).ApiFindKeys)

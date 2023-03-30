@@ -6,13 +6,13 @@ import (
 	"market/app/validator"
 )
 
-func initListenApis(g *gin.RouterGroup) {
-	group := g.Group("/listen", middleware.CheckUserLogin())
+func initLessonApis(g *gin.RouterGroup) {
+	group := g.Group("/lesson", middleware.CheckUserLogin())
 	{
-		group.POST("/create", (validator.BsValidator{}).VListenCreate)
-		group.POST("/update", (validator.BsValidator{}).VListenUpdate)
-		group.GET("/:id", (validator.BsValidator{}).VListenInfo)
-		group.GET("/list", (validator.BsValidator{}).VListenList)
+		group.POST("/create", (validator.BsValidator{}).VLessonCreate)
+		group.POST("/update", (validator.BsValidator{}).VLessonUpdate)
+		group.GET("/:id", (validator.BsValidator{}).VLessonInfo)
+		group.GET("/list", (validator.BsValidator{}).VLessonList)
 	}
 	asset := g.Group("/asset", middleware.CheckUserLogin())
 	{

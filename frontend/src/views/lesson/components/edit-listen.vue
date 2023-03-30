@@ -1,7 +1,7 @@
 <template>
   <dialog-panel title="课程修改" confirm-text="保存" :visible="visible" @cancel="cancel" @confirm="save"
                 :confirm-loading="loading" width="900px">
-    <el-form :model="listenForm" ref="listenForm" label-width="100px" size="small" :rules="listenRules">
+    <el-form :model="lessonForm" ref="lessonForm" label-width="100px" size="small" :rules="lessonRules">
       <el-row :gutter="30">
         <el-col :span="24" style="margin-bottom: 15px;">
           <p class="lesson-img-tip text-primary">课程图填写方式 1：点击文本框右侧的选择按钮，直接选择本机上传的图片（本机图选择后不可改动 图片 ID）</p>
@@ -9,28 +9,28 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="课程图" prop="img_url">
-            <el-input placeholder="请填写课程图" v-model="listenForm.img_url">
+            <el-input placeholder="请填写课程图" v-model="lessonForm.img_url">
               <el-button slot="append" icon="el-icon-thumb" @click="selectImg">选择</el-button>
             </el-input>
           </el-form-item>
           <el-form-item label="标题" prop="title">
-            <el-input v-model="listenForm.title" placeholder="请填写课程标题" />
+            <el-input v-model="lessonForm.title" placeholder="请填写课程标题" />
           </el-form-item>
           <el-form-item label="小标题" prop="sub_title">
-            <el-input v-model="listenForm.sub_title" placeholder="请填写课程小标题" />
+            <el-input v-model="lessonForm.sub_title" placeholder="请填写课程小标题" />
           </el-form-item>
           <el-form-item label="金额" prop="amt">
-            <el-input-number v-model="listenForm.amt" :min="1" :max="99999" class="w200"/>
+            <el-input-number v-model="lessonForm.amt" :min="1" :max="99999" class="w200"/>
           </el-form-item>
           <el-form-item label="是否展示" prop="state">
-            <el-switch v-model="listenForm.state" :active-value="1" :inactive-value="0"/>
+            <el-switch v-model="lessonForm.state" :active-value="1" :inactive-value="0"/>
           </el-form-item>
           <el-form-item label="排序" prop="order_by">
-            <el-input-number v-model="listenForm.order_by" :min="1" :max="999"/>
+            <el-input-number v-model="lessonForm.order_by" :min="1" :max="999"/>
           </el-form-item>
         </el-col>
         <el-col :span="12" class="list-box">
-          <el-row :gutter="10" v-for="(ls, idx) in listenForm.lists">
+          <el-row :gutter="10" v-for="(ls, idx) in lessonForm.lists">
             <el-col :span="16">
               <el-form-item :prop="'lists.'+idx+'.title'"
                             label-width="0"
@@ -60,19 +60,19 @@
       </el-row>
     </el-form>
 
-    <listen-img-select ref="img_select" @handle-select="selectedImg"/>
+    <lesson-img-select ref="img_select" @handle-select="selectedImg"/>
   </dialog-panel>
 </template>
 
 <script>
   import DialogPanel from "@c/DialogPanel"
-  import { listenUpdate, listenInfo } from "@a/listen"
-  import ListenImgSelect from "./select-images"
+  import { lessonUpdate, lessonInfo } from "@a/lesson"
+  import LessonImgSelect from "./select-images"
   import { validURL } from '@/utils/validate'
 
   export default {
     components: {
-      DialogPanel, ListenImgSelect
+      DialogPanel, LessonImgSelect
     },
     data() {
       const validImgUrl = (rule, value, callback) => {
@@ -85,7 +85,7 @@
       return {
         visible: false,
         loading: false,
-        listenForm: {
+        lessonForm: {
           id: 0,
           img_url: "",
           title: "",
@@ -95,7 +95,7 @@
           state: 1,
           lists: [{title: "", order_by: 1}],
         },
-        listenRules: {
+        lessonRules: {
           img_url: [{ required: true, message: "请填写课程图" }, {validator: validImgUrl}],
           title: { required: true, message: "请填写标题" },
           amt: { required: true, message: "请填写金额" },
@@ -105,29 +105,29 @@
     },
     methods: {
       initUpdate(id) {
-        listenInfo(id).then(res => {
-          this.listenForm = res.data
+        lessonInfo(id).then(res => {
+          this.lessonForm = res.data
           this.visible = true
         }).catch(err => {
           console.log(err)
         })
       },
       cancel() {
-        this.$refs.listenForm.resetFields()
+        this.$refs.lessonForm.resetFields()
         this.visible = false
       },
       moreList() {
-        let orderBy = this.listenForm.lists[this.listenForm.lists.length-1].order_by+1
-        this.listenForm.lists.push({title: "", order_by: orderBy})
+        let orderBy = this.lessonForm.lists[this.lessonForm.lists.length-1].order_by+1
+        this.lessonForm.lists.push({title: "", order_by: orderBy})
       },
       removeOne(idx) {
-        this.listenForm.lists.splice(idx, 1)
+        this.lessonForm.lists.splice(idx, 1)
       },
       save() {
-        this.$refs.listenForm.validate((v) => {
+        this.$refs.lessonForm.validate((v) => {
           if (v) {
             this.loading = true
-            listenUpdate(this.listenForm)
+            lessonUpdate(this.lessonForm)
               .then((res) => {
                 this.$message.success("修改成功")
                 this.$emit("success")
@@ -146,7 +146,7 @@
         this.$refs.img_select.initSelect()
       },
       selectedImg(v) {
-        this.$set(this.listenForm, "img_url", v)
+        this.$set(this.lessonForm, "img_url", v)
       },
     },
   }

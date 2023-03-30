@@ -1,11 +1,20 @@
 package servicepayment
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"github.com/bwmarrin/snowflake"
+	"github.com/gin-gonic/gin"
+	"github.com/wechatpay-apiv3/wechatpay-go/core"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
+	"io/ioutil"
+	"log"
 	"market/app/model"
+	"market/app/utils"
 	"market/app/vars"
-	"market/library/curl"
-	"math/rand"
 	"time"
 )
 
@@ -34,45 +43,160 @@ type H5Info struct {
 }
 
 type PayResponse struct {
+	H5Url   string     `json:"h5_url"`
+	Code    string     `json:"code"`
+	Message string     `json:"message"`
+	Detail  PayResBody `json:"detail"`
+}
+
+type PayResBody struct {
+	Location string `json:"location"`
+	Value    string `json:"value"`
 }
 
 // UserOrder 用户下单
-func UserOrder(mobile, ip string) (*PayResponse, error) {
+func UserOrder(ctx *gin.Context, mobile string) (*PayResponse, error) {
 	order, err := buildLocalOrder(mobile)
 	if err != nil {
 		return nil, err
 	}
-	var data = &PayRequest{
-		AppId:       vars.YmlConfig.GetString("WxPay.AppId"),
-		Mchid:       vars.YmlConfig.GetString("WxPay.Mchid"),
-		Description: vars.YmlConfig.GetString("WxPay.Desc"),
-		OurTradeNo:  order.OutTradeNo,
-		NotifyUrl:   vars.YmlConfig.GetString("WxPay.NotifyUrl"),
-		Amount:      PayAmt{Total: order.Amt, Currency: "CNY"},
-		SceneInfo:   Scene{PayerClientIp: ip, H5Info: H5Info{Type: "Wap"}},
-	}
-	orderUrl := vars.YmlConfig.GetString("WxPay.H5.Order")
-	c, err := curl.New(orderUrl).Debug(true).ResBody(true).Post().JsonData(data)
-	if err != nil {
-		return nil, err
-	}
-	var res PayResponse
-	err = c.Request(&res, curl.JsonHeader())
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
+	wxPayOrder(ctx, order.OutTradeNo, ctx.ClientIP(), int64(order.Amt))
+	//mchId := vars.YmlConfig.GetString("WxPay.Mchid")
+	//var data = &PayRequest{
+	//	AppId:       vars.YmlConfig.GetString("WxPay.AppId"),
+	//	Mchid:       mchId,
+	//	Description: vars.YmlConfig.GetString("WxPay.Desc"),
+	//	OurTradeNo:  order.OutTradeNo,
+	//	NotifyUrl:   vars.YmlConfig.GetString("WxPay.NotifyUrl"),
+	//	Amount:      PayAmt{Total: order.Amt, Currency: "CNY"},
+	//	SceneInfo:   Scene{PayerClientIp: ip, H5Info: H5Info{Type: "Wap"}},
+	//}
+	//
+	//orderUrl := vars.YmlConfig.GetString("WxPay.H5.Order")
+	//c, err := curl.New(orderUrl).Debug(true).ResBody(true).Post().JsonData(data)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//var res PayResponse
+	//sign := h5OrderSign(mchId)
+	//err = c.Request(&res, curl.JsonHeader(), curl.Accept(), curl.Authorization(sign))
+	//if err != nil {
+	//	return nil, err
+	//}
+	return nil, nil
 }
 
 func buildLocalOrder(mobile string) (*model.Order, error) {
-	sn := time.Now().Format("20060102150405")
-	rand.Seed(time.Now().UnixNano())
-	r := rand.Intn(85000) + 5000
+	node, err := snowflake.NewNode(1)
+	if err != nil {
+		return nil, err
+	}
 	order := &model.Order{
 		Amt:        vars.YmlConfig.GetInt("WxPay.Amount"),
 		Mobile:     mobile,
-		OutTradeNo: fmt.Sprintf("%s%d", sn, r),
+		OutTradeNo: node.Generate().String(),
+		State:      vars.OrderStateCreated,
 	}
-	err := model.NewOrder(vars.DBMysql).CreateOrder(order)
+	err = model.NewOrder(vars.DBMysql).CreateOrder(order)
 	return order, err
+}
+
+func h5OrderSign(mchId string) string {
+	// serial_no 微信商户 API 证书
+	// signature 签名
+	// nonce_str 请求随机串
+	timestamp := time.Now().Unix()
+	nonce := ""
+	sign := utils.Base64(fmt.Sprintf("GET\n/v3/certificates\n%d\n%s\n\n", timestamp, nonce))
+	return fmt.Sprintf(
+		"WECHATPAY2-SHA256-RSA2048 mchid=\"%s\",nonce_str=\"%s\",timestamp=\"%d\",serial_no=\"%s\",signature=\"%s\"",
+		mchId, nonce, timestamp, vars.YmlConfig.GetString("WxPay.SerialNo"), sign,
+	)
+}
+
+// ActionOrder 异步回调 TODO
+func ActionOrder(outTradeNo string) (err error) {
+	// 非严谨支付流程，无需查询订单准确状态
+	return model.NewOrder(vars.DBMysql).ActionOrder(outTradeNo)
+}
+
+// LoadPrivateKeyWithPath 通过私钥的文件路径内容加载私钥
+func LoadPrivateKeyWithPath(path string) (privateKey *rsa.PrivateKey, err error) {
+	privateKeyBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read private pem file err:%s", err.Error())
+	}
+	return LoadPrivateKey(string(privateKeyBytes))
+}
+
+// LoadPrivateKey 通过私钥的文本内容加载私钥
+func LoadPrivateKey(privateKeyStr string) (privateKey *rsa.PrivateKey, err error) {
+	block, _ := pem.Decode([]byte(privateKeyStr))
+	if block == nil {
+		return nil, fmt.Errorf("decode private key err")
+	}
+	if block.Type != "PRIVATE KEY" {
+		return nil, fmt.Errorf("the kind of PEM should be PRVATE KEY")
+	}
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parse private key err:%s", err.Error())
+	}
+	privateKey, ok := key.(*rsa.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("not a RSA private key")
+	}
+	return privateKey, nil
+}
+
+func wxPayOrder(ctx *gin.Context, outTradeNo, ip string, amt int64) {
+	var (
+		mchID                      = vars.YmlConfig.GetString("WxPay.Mchid")    // 商户号
+		mchCertificateSerialNumber = vars.YmlConfig.GetString("WxPay.SerialNo") // 商户证书序列号
+		mchAPIv3Key                = "2ab9****************************"         // 商户APIv3密钥
+	)
+
+	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+	mchPrivateKey, err := LoadPrivateKeyWithPath(vars.BasePath + "/config/apiclient_key.pem")
+	if err != nil {
+		log.Print("load merchant private key error")
+	}
+
+	// 使用商户私钥等初始化 client，并使它具有自动定时获取微信支付平台证书的能力
+	opts := []core.ClientOption{
+		option.WithWechatPayAutoAuthCipher(mchID, mchCertificateSerialNumber, mchPrivateKey, mchAPIv3Key),
+	}
+	client, err := core.NewClient(ctx, opts...)
+	if err != nil {
+		log.Printf("new wechat pay client err:%s", err)
+	}
+
+	svc := h5.H5ApiService{Client: client}
+	resp, result, err := svc.Prepay(ctx,
+		h5.PrepayRequest{
+			Appid:       core.String(vars.YmlConfig.GetString("WxPay.AppId")),
+			Mchid:       core.String(vars.YmlConfig.GetString("WxPay.Mchid")),
+			Description: core.String(vars.YmlConfig.GetString("WxPay.Desc")),
+			OutTradeNo:  core.String(outTradeNo),
+			NotifyUrl:   core.String(vars.YmlConfig.GetString("WxPay.NotifyUrl")),
+			Amount: &h5.Amount{
+				Currency: core.String("CNY"),
+				Total:    core.Int64(amt),
+			},
+			SceneInfo: &h5.SceneInfo{
+				H5Info: &h5.H5Info{
+					Type: core.String("Wap"),
+				},
+				PayerClientIp: core.String(ip),
+			},
+		},
+	)
+
+	if err != nil {
+		// 处理错误
+		log.Printf("call Prepay err:%s", err)
+	} else {
+		// 处理返回结果
+		log.Printf("status=%d resp=%s", result.Response.StatusCode, resp)
+	}
 }

@@ -64,21 +64,21 @@ export const constantRoutes = [
     ],
   },
   {
-    path: "/listen",
+    path: "/lesson",
     component: Layout,
-    redirect: "/listen/list",
+    redirect: "/lesson/list",
     meta: { title: "课程设置", icon: "el-icon-collection" },
     children: [
       {
         path: "images",
-        name: "ListenImg",
-        component: () => import("@v/listen/images"),
+        name: "LessonImg",
+        component: () => import("@v/lesson/images"),
         meta: { title: "课程图上传"},
       },
       {
         path: "list",
-        name: "ListenList",
-        component: () => import("@v/listen/list"),
+        name: "LessonList",
+        component: () => import("@v/lesson/list"),
         meta: { title: "课程列表"},
       },
     ],

@@ -16,7 +16,7 @@ type Asset struct{}
 func (l *Asset) AssetList(ctx *gin.Context, p interface{}) {
 	var params = p.(*v_data.VAssetList)
 	offset := utils.GetPages(params.Page, params.PageSize)
-	imgs, total, err := model.NewListenImg(vars.DBMysql).ListenImgList(params.Name, offset, params.PageSize)
+	imgs, total, err := model.NewLessonImg(vars.DBMysql).LessonImgList(params.Name, offset, params.PageSize)
 	if err != nil {
 		response.Fail(ctx, "查询错误: "+err.Error())
 		return
@@ -28,7 +28,7 @@ func (l *Asset) VAsset(ctx *gin.Context, v string) {
 	if len(v) != 32 {
 		return
 	}
-	filePath := model.NewListenImg(vars.DBMysql).FindImgByCode(v)
+	filePath := model.NewLessonImg(vars.DBMysql).FindImgByCode(v)
 	ctx.File(vars.BasePath + filePath)
 }
 
@@ -38,7 +38,7 @@ func (l *Asset) AssetDel(ctx *gin.Context, v string) {
 		response.Fail(ctx, "参数错误")
 		return
 	}
-	err = model.NewListenImg(vars.DBMysql).DeleteById(id)
+	err = model.NewLessonImg(vars.DBMysql).DeleteById(id)
 	if err != nil {
 		response.Fail(ctx, "请求错误："+err.Error())
 		return
@@ -49,7 +49,7 @@ func (l *Asset) AssetDel(ctx *gin.Context, v string) {
 func (l *Asset) AssetUpload(ctx *gin.Context) {
 	savePath := vars.BasePath + vars.YmlConfig.GetString("FileUploadSetting.UploadPath")
 	if ok, file := serviceasset.Upload(ctx, savePath); ok {
-		if err := model.NewListenImg(vars.DBMysql).ListenImgCreate(file); err == nil {
+		if err := model.NewLessonImg(vars.DBMysql).LessonImgCreate(file); err == nil {
 			response.Success(ctx, nil)
 			return
 		}

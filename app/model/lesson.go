@@ -5,7 +5,7 @@ import (
 	"market/app/cache"
 )
 
-type Listen struct {
+type Lesson struct {
 	connectDb
 
 	Id       int64         `json:"id"`
@@ -15,23 +15,23 @@ type Listen struct {
 	OrderBy  int           `json:"order_by"`
 	State    uint8         `json:"state"`
 	Amt      int           `json:"amt"`
-	Lists    []*ListenList `json:"lists" gorm:"-"`
+	Lists    []*LessonList `json:"lists" gorm:"-"`
 }
 
-func (m *Listen) TableName() string {
-	return "listens"
+func (m *Lesson) TableName() string {
+	return "lessons"
 }
 
-func NewListen(db *gorm.DB) *Listen {
-	return &Listen{connectDb: connectDb{DB: db}}
+func NewLesson(db *gorm.DB) *Lesson {
+	return &Lesson{connectDb: connectDb{DB: db}}
 }
 
-func (m *Listen) FindListenById(id int64) (lsn *Listen, err error) {
+func (m *Lesson) FindLessonById(id int64) (lsn *Lesson, err error) {
 	err = m.Table(m.TableName()).Where("id = ?", id).First(&lsn).Error
 	return
 }
 
-func (m *Listen) ListenList(title string, state uint8, offset, limit int64) (ls []*Listen, total int64, err error) {
+func (m *Lesson) LessonList(title string, state uint8, offset, limit int64) (ls []*Lesson, total int64, err error) {
 	tbl := m.Table(m.TableName()).Where("state = ?", state).Order("order_by asc, id desc")
 	if len(title) > 0 {
 		tbl = tbl.Where("title like ?", "%"+title+"%")
@@ -46,15 +46,15 @@ func (m *Listen) ListenList(title string, state uint8, offset, limit int64) (ls 
 	return
 }
 
-func (m *Listen) ListenCreate(listen *Listen, lists []*ListenList) (err error) {
+func (m *Lesson) LessonCreate(lesson *Lesson, lists []*LessonList) (err error) {
 	err = m.Transaction(func(tx *gorm.DB) error {
-		if err = tx.Table(m.TableName()).Create(listen).Error; err != nil {
+		if err = tx.Table(m.TableName()).Create(lesson).Error; err != nil {
 			return err
 		}
 		for i := range lists {
-			lists[i].ListenId = listen.Id
+			lists[i].LessonId = lesson.Id
 		}
-		if err = NewListenList(tx).ListenListCreate(lists); err != nil {
+		if err = NewLessonList(tx).LessonListCreate(lists); err != nil {
 			return err
 		}
 		return nil
@@ -62,15 +62,15 @@ func (m *Listen) ListenCreate(listen *Listen, lists []*ListenList) (err error) {
 	return
 }
 
-func (m *Listen) ListenUpdate(d map[string]interface{}, id int64, lists []*ListenList) (err error) {
+func (m *Lesson) LessonUpdate(d map[string]interface{}, id int64, lists []*LessonList) (err error) {
 	err = m.Transaction(func(tx *gorm.DB) error {
 		if err = tx.Table(m.TableName()).Where("id = ?", id).Updates(d).Error; err != nil {
 			return err
 		}
-		if err = NewListenList(tx).DeleteByListenId(id); err != nil {
+		if err = NewLessonList(tx).DeleteByLessonId(id); err != nil {
 			return err
 		}
-		if err = NewListenList(tx).ListenListCreate(lists); err != nil {
+		if err = NewLessonList(tx).LessonListCreate(lists); err != nil {
 			return err
 		}
 		return nil
@@ -81,8 +81,8 @@ func (m *Listen) ListenUpdate(d map[string]interface{}, id int64, lists []*Liste
 
 ///////// API ////////////
 
-func (m *Listen) ApiListenList() (ls []*Listen, err error) {
-	err = cache.New(m.DB).Query("db:listens", &ls, func(db *gorm.DB, v interface{}) error {
+func (m *Lesson) ApiLessonList() (ls []*Lesson, err error) {
+	err = cache.New(m.DB).Query("db:lessons", &ls, func(db *gorm.DB, v interface{}) error {
 		return db.Table(m.TableName()).Where("state = 1").Select("id,title,sub_title,img_url").
 			Order("order_by asc, id desc").Find(v).Error
 	})
@@ -90,8 +90,8 @@ func (m *Listen) ApiListenList() (ls []*Listen, err error) {
 	return
 }
 
-func (m *Listen) ApiFindListenById(id int64) (lsn *Listen, err error) {
-	err = cache.New(m.DB).QueryRow("db:listen", &lsn, id, func(db *gorm.DB, v interface{}, id interface{}) error {
+func (m *Lesson) ApiFindLessonById(id int64) (lsn *Lesson, err error) {
+	err = cache.New(m.DB).QueryRow("db:lesson", &lsn, id, func(db *gorm.DB, v interface{}, id interface{}) error {
 		return db.Table(m.TableName()).Where("id = ?", id).First(v).Error
 	})
 	return

@@ -5,7 +5,7 @@ import (
 	"market/app/cache"
 )
 
-type ListenImg struct {
+type LessonImg struct {
 	connectDb
 
 	Id     int64  `json:"id"`
@@ -15,15 +15,15 @@ type ListenImg struct {
 	FCode  string `json:"f_code"`
 }
 
-func (m *ListenImg) TableName() string {
-	return "listen_imgs"
+func (m *LessonImg) TableName() string {
+	return "lesson_imgs"
 }
 
-func NewListenImg(db *gorm.DB) *ListenImg {
-	return &ListenImg{connectDb: connectDb{DB: db}}
+func NewLessonImg(db *gorm.DB) *LessonImg {
+	return &LessonImg{connectDb: connectDb{DB: db}}
 }
 
-func (m *ListenImg) ListenImgList(name string, offset, limit int64) (ls []*ListenImg, total int64, err error) {
+func (m *LessonImg) LessonImgList(name string, offset, limit int64) (ls []*LessonImg, total int64, err error) {
 	tbl := m.Table(m.TableName()).Where("state = 1")
 	if len(name) > 0 {
 		tbl = tbl.Where("name like ?", "%"+name+"%")
@@ -38,23 +38,23 @@ func (m *ListenImg) ListenImgList(name string, offset, limit int64) (ls []*Liste
 	return
 }
 
-func (m *ListenImg) ListenImgCreate(listen *ListenImg) (err error) {
-	err = m.Table(m.TableName()).Create(listen).Error
+func (m *LessonImg) LessonImgCreate(lesson *LessonImg) (err error) {
+	err = m.Table(m.TableName()).Create(lesson).Error
 	return
 }
 
-func (m *ListenImg) FindImgById(listenId int64) (lists []*ListenImg) {
-	m.Table(m.TableName()).Where("listen_id = ?", listenId).Order("order_by asc").Find(&lists)
+func (m *LessonImg) FindImgById(lessonId int64) (lists []*LessonImg) {
+	m.Table(m.TableName()).Where("lesson_id = ?", lessonId).Order("order_by asc").Find(&lists)
 	return
 }
 
-func (m *ListenImg) DeleteById(id int64) (err error) {
+func (m *LessonImg) DeleteById(id int64) (err error) {
 	err = m.Table(m.TableName()).Where("id = ?", id).Update("state", 0).Error
 	return
 }
 
-func (m *ListenImg) FindImgByCode(code string) (filePath string) {
-	var img ListenImg
+func (m *LessonImg) FindImgByCode(code string) (filePath string) {
+	var img LessonImg
 	err := cache.New(m.DB).QueryRow("db:lsimg", &img, code, func(db *gorm.DB, v interface{}, id interface{}) error {
 		return db.Table(m.TableName()).Select("img_url").Where("f_code = ?", id).First(v).Error
 	})

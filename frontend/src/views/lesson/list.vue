@@ -20,7 +20,7 @@
       <el-button type="primary" icon="el-icon-plus" size="mini" @click="add">添加课程</el-button>
     </el-col>
     <el-col :span="24">
-      <el-table v-loading="loadings.pageLoading" :data="listenList.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
+      <el-table v-loading="loadings.pageLoading" :data="lessonList.list" highlight-current-row stripe border size="mini" style="margin-top: 15px">
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="name" label="图片" width="170">
           <template slot-scope="scope">
@@ -46,27 +46,27 @@
       </el-table>
     </el-col>
     <el-col :span="24" style="margin-top: 15px;">
-      <page ref="page" :page="search.page" :total="listenList.total" @current-change="handlePage" @size-change="handlePageSize" />
+      <page ref="page" :page="search.page" :total="lessonList.total" @current-change="handlePage" @size-change="handlePageSize" />
 
-      <listen-create ref="listenCreate" @success="getList" />
-      <listen-update ref="listenUpdate" @success="getList" />
+      <lesson-create ref="lessonCreate" @success="getList" />
+      <lesson-update ref="lessonUpdate" @success="getList" />
     </el-col>
   </el-row>
 </template>
 
 <script>
-import { listenList } from "@a/listen"
+import { lessonList } from "@a/lesson"
 import { assetInfo } from "@a/asset"
-import ListenCreate from "./components/add-listen"
-import ListenUpdate from "./components/edit-listen"
+import LessonCreate from "./components/add-lesson"
+import LessonUpdate from "./components/edit-lesson"
 import Page from "@c/Page"
 import { validURL } from '@/utils/validate'
 
 export default {
-  // name: 'ListenList',
+  // name: 'LessonList',
   components: {
-    ListenCreate,
-    ListenUpdate,
+    LessonCreate,
+    LessonUpdate,
     Page,
   },
   data() {
@@ -74,7 +74,7 @@ export default {
       loadings: {
         pageLoading: false,
       },
-      listenList: {
+      lessonList: {
         total: 0,
         list: [],
       },
@@ -101,9 +101,9 @@ export default {
   methods: {
     getList() {
       this.loadings.pageLoading = true
-      listenList(this.search)
+      lessonList(this.search)
         .then((res) => {
-          this.listenList = res.data
+          this.lessonList = res.data
           this.loadings.pageLoading = false
         })
         .catch(() => {
@@ -111,10 +111,10 @@ export default {
         })
     },
     add() {
-      this.$refs.listenCreate.initCreate()
+      this.$refs.lessonCreate.initCreate()
     },
     editRow(row) {
-      this.$refs.listenUpdate.initUpdate(row.id)
+      this.$refs.lessonUpdate.initUpdate(row.id)
     },
     doSearch() {
       this.search.page = 1

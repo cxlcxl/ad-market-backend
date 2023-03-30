@@ -1,32 +1,32 @@
 import request from "@/utils/request";
 
-export function listenList(params) {
+export function lessonList(params) {
   return request({
-    url: "/listen/list",
+    url: "/lesson/list",
     method: "get",
     params,
   });
 }
 
-export function listenCreate(data) {
+export function lessonCreate(data) {
   return request({
-    url: "/listen/create",
+    url: "/lesson/create",
     method: "post",
     data,
   });
 }
 
-export function listenUpdate(data) {
+export function lessonUpdate(data) {
   return request({
-    url: "/listen/update",
+    url: "/lesson/update",
     method: "post",
     data,
   });
 }
 
-export function listenInfo(id) {
+export function lessonInfo(id) {
   return request({
-    url: "/listen/"+id,
+    url: "/lesson/"+id,
     method: "get",
   });
 }

@@ -22,7 +22,7 @@ func Router() error {
 
 		initRbacApis(group)
 		initAccountApis(group)
-		initListenApis(group)
+		initLessonApis(group)
 		initConfigApis(group)
 	}
 

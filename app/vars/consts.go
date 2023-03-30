@@ -27,6 +27,12 @@ const (
 	AccountStateAdded
 )
 
+const (
+	OrderStateCreated = iota + 1
+	OrderStatePaid
+	OrderStateDestroy
+)
+
 var (
 	ResponseMsg = map[int]string{
 		ResponseCodeOk:           "OK",
@@ -45,5 +51,11 @@ var (
 		AccountStateNoPaid: "已认证未支付",
 		AccountStatePaid:   "已认证已支付",
 		AccountStateAdded:  "已加微信",
+	}
+	// OrderState 订单状态
+	OrderState = map[int]string{
+		OrderStateCreated: "已创建",
+		OrderStatePaid:    "已支付",
+		OrderStateDestroy: "已作废",
 	}
 )

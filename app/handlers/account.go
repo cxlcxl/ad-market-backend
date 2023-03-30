@@ -6,6 +6,7 @@ import (
 	"market/app/model"
 	"market/app/response"
 	"market/app/service/ali_sms"
+	servicepayment "market/app/service/payment"
 	"market/app/utils"
 	"market/app/validator/v_data"
 	"market/app/vars"
@@ -63,12 +64,27 @@ func (h *Account) AccountUpdate(ctx *gin.Context, p interface{}) {
 
 func (h *Account) AccountSms(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VAccountSms)
+	if act := model.NewAct(vars.DBMysql).FindAccountStateByMobile(params.Mobile); act != nil {
+		if act.State == vars.AccountStateNoPaid {
+			// 已验证通过未支付的用户支付下单
+			rs, err := servicepayment.UserOrder(ctx, params.Mobile)
+			if err != nil {
+				response.Fail(ctx, "下单失败请重试："+err.Error())
+			} else {
+				response.Success(ctx, rs)
+			}
+			return
+		} else if act.State >= vars.AccountStatePaid {
+			response.Success(ctx, 1)
+			return
+		}
+	}
 	if code, err := ali_sms.BuildAndSend(params.Mobile); err != nil {
 		response.Fail(ctx, "验证码发送失败："+err.Error())
 	} else {
 		fmt.Println("生成了验证码", code)
 		// gin.H{"code": code}
-		response.Success(ctx, nil)
+		response.Success(ctx, 0)
 	}
 }
 
@@ -81,6 +97,12 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 	if err := ali_sms.ValidSmsCode(params.Mobile, params.Code); err != nil {
 		response.Fail(ctx, "验证失败："+err.Error())
 	} else {
-		response.Success(ctx, nil)
+		// 验证通过直接支付下单
+		rs, err := servicepayment.UserOrder(ctx, params.Mobile)
+		if err != nil {
+			response.Fail(ctx, "下单失败请重试："+err.Error())
+		} else {
+			response.Success(ctx, rs)
+		}
 	}
 }

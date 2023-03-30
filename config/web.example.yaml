@@ -58,11 +58,12 @@ XCXLogin: # 参数在：开发 ->开发者管理 -> 开发设置中
   Secret: ""
 
 WxPay:
-  AppId: ""
-  Mchid: ""
+  AppId: "wxaddafwedh2323aas"
+  Mchid: "1200990042"
+  SerialNo: "1200990042" # 微信商户 API 证书
   Amount: 100 # 订单金额￥1元整，单位（分）
   Desc: "天创跨境-体验课"
-  NotifyUrl: ""
+  NotifyUrl: "https://backend.skyki.com.cn/api/wxpay/action"
   ActionKey: ""
   H5:
     Order: "https://api.mch.weixin.qq.com/v3/pay/transactions/h5"

@@ -30,6 +30,11 @@ func (m *Account) FindAccountById(id int64) (act *Account, err error) {
 	return
 }
 
+func (m *Account) FindAccountStateByMobile(mobile string) (act *Account) {
+	m.Table(m.TableName()).Where("mobile = ?", mobile).Select("state").First(&act)
+	return
+}
+
 func (m *Account) AccountList(mobile, accountName string, state uint8, offset, limit int64) (ls []*Account, total int64, err error) {
 	tbl := m.Table(m.TableName()).Order("updated_at desc")
 	if len(accountName) > 0 {

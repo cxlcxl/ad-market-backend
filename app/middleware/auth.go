@@ -62,7 +62,7 @@ func CheckApiSecret() gin.HandlerFunc {
 		}
 
 		if !checkSecret(headers.Authorization) {
-			response.Fail(ctx, "请求有误，请重试")
+			response.TokenExpired(ctx)
 			return
 		}
 		ctx.Next()
@@ -84,6 +84,7 @@ func checkSecret(s string) bool {
 		return false
 	}
 	n := time.Now().Unix()
+	//if i-n <= 0 || i-n > 30 { // 有效期保证在 30s 内
 	if i-n <= 0 {
 		return false
 	}

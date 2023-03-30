@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func Upload(ctx *gin.Context, savePath string) (ok bool, listenImg *model.ListenImg) {
+func Upload(ctx *gin.Context, savePath string) (ok bool, lessonImg *model.LessonImg) {
 	newSavePath, newReturnPath := generateYearMonthPath(savePath)
 	// 获取上传的文件名(参数验证器已经验证完成了第一步错误，这里简化)
 	file, _ := ctx.FormFile("file") // file 使用默认的上传名
@@ -24,7 +24,7 @@ func Upload(ctx *gin.Context, savePath string) (ok bool, listenImg *model.Listen
 
 	if saveErr = ctx.SaveUploadedFile(file, newSavePath+saveFileName); saveErr == nil {
 		// 上传成功,返回资源的相对路径，这里请根据实际返回绝对路径或者相对路径
-		img := &model.ListenImg{
+		img := &model.LessonImg{
 			ImgUrl: strings.ReplaceAll(newReturnPath+saveFileName, vars.BasePath, ""),
 			FCode:  saveName,
 			Name:   file.Filename,
