@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"market/app/model"
 	"market/app/response"
@@ -64,27 +63,10 @@ func (h *Account) AccountUpdate(ctx *gin.Context, p interface{}) {
 
 func (h *Account) AccountSms(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VAccountSms)
-	if act := model.NewAct(vars.DBMysql).FindAccountStateByMobile(params.Mobile); act != nil {
-		if act.State == vars.AccountStateNoPaid {
-			// 已验证通过未支付的用户支付下单
-			rs, err := servicepayment.UserOrder(ctx, params.Mobile)
-			if err != nil {
-				response.Fail(ctx, "下单失败请重试："+err.Error())
-			} else {
-				response.Success(ctx, rs)
-			}
-			return
-		} else if act.State >= vars.AccountStatePaid {
-			response.Success(ctx, 1)
-			return
-		}
-	}
-	if code, err := ali_sms.BuildAndSend(params.Mobile); err != nil {
+	if _, err := ali_sms.BuildAndSend(params.Mobile); err != nil {
 		response.Fail(ctx, "验证码发送失败："+err.Error())
 	} else {
-		fmt.Println("生成了验证码", code)
-		// gin.H{"code": code}
-		response.Success(ctx, 0)
+		response.Success(ctx, nil)
 	}
 }
 
@@ -97,12 +79,20 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 	if err := ali_sms.ValidSmsCode(params.Mobile, params.Code); err != nil {
 		response.Fail(ctx, "验证失败："+err.Error())
 	} else {
+		if act := model.NewAct(vars.DBMysql).FindAccountStateByMobile(params.Mobile); act != nil {
+			if act.State >= vars.AccountStatePaid {
+				response.Success(ctx, gin.H{"state": 2, "info": "已支付的手机号，请直接跳转"})
+				return
+			}
+		} else {
+			_ = model.NewAct(vars.DBMysql).AccountCreate(vars.AccountStateNoPaid, params.Mobile)
+		}
 		// 验证通过直接支付下单
 		rs, err := servicepayment.UserOrder(ctx, params.Mobile)
 		if err != nil {
 			response.Fail(ctx, "下单失败请重试："+err.Error())
 		} else {
-			response.Success(ctx, rs)
+			response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付", "order": rs})
 		}
 	}
 }
