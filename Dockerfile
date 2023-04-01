@@ -27,7 +27,6 @@ COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/S
 ENV TZ Asia/Shanghai
 
 WORKDIR /app
-RUN mkdir storage
 COPY --from=builder /app/web/market /app/web/market
 COPY --from=builder /app/config /app/config
 

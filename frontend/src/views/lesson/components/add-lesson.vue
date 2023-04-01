@@ -143,7 +143,7 @@
   }
 </script>
 
-<style lang="less">
+<style lang="scss">
   .lesson-img-tip {
     height: 25px;
     line-height: 25px;
