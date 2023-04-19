@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -67,6 +68,12 @@ func GetFileExt(fp multipart.File) string {
 		return ""
 	}
 	return http.DetectContentType(buffer)
+}
+
+func Sha1(s string) string {
+	o := sha1.New()
+	o.Write([]byte(s))
+	return hex.EncodeToString(o.Sum(nil))
 }
 
 // GenerateSecret 生成密码加密串

@@ -9,6 +9,7 @@ import (
 )
 
 var xcxAccessTokenCacheKey = "wxxcx:access_token"
+var xcxJsApiTicketCacheKey = "wxxcx:jsapi_ticket"
 
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
@@ -18,6 +19,7 @@ type TokenResponse struct {
 func GetAccessToken() (token string, err error) {
 	if vars.DBRedis.HasKey(xcxAccessTokenCacheKey) {
 		token = vars.DBRedis.GetString(xcxAccessTokenCacheKey)
+		fmt.Println("token: ", token)
 		return
 	} else {
 		tokenUrl := vars.YmlConfig.GetString("XCXLogin.AccessToken")
@@ -30,10 +32,43 @@ func GetAccessToken() (token string, err error) {
 		queryParams := curl.HttpBuildQuery(d)
 		tokenUrl = fmt.Sprintf("%s?%s", tokenUrl, queryParams)
 		if err = curl.New(tokenUrl).Request(&res, curl.JsonHeader()); err != nil {
+			fmt.Println("get token: ", err)
 			return
 		}
 		vars.DBRedis.SetString(xcxAccessTokenCacheKey, res.AccessToken, time.Second*(7140))
 		return res.AccessToken, nil
+	}
+}
+
+type TicketResponse struct {
+	ErrCode   int    `json:"errcode"`
+	ErrMsg    string `json:"errmsg"`
+	Ticket    string `json:"ticket"`
+	ExpiresIn int    `json:"expires_in"`
+}
+
+func GetJsApiTicket() (ticket string, err error) {
+	if vars.DBRedis.HasKey(xcxJsApiTicketCacheKey) {
+		ticket = vars.DBRedis.GetString(xcxJsApiTicketCacheKey)
+		fmt.Println("ticket: ", ticket)
+		return
+	} else {
+		token := ""
+		token, err = GetAccessToken()
+		if err != nil {
+			return
+		}
+		ticketUrl := vars.YmlConfig.GetString("XCXLogin.JsApiTicket")
+		d := map[string]string{"type": "jsapi", "access_token": token}
+		var res TicketResponse
+		queryParams := curl.HttpBuildQuery(d)
+		ticketUrl = fmt.Sprintf("%s?%s", ticketUrl, queryParams)
+		if err = curl.New(ticketUrl).Request(&res, curl.JsonHeader()); err != nil {
+			fmt.Println("get ticket: ", err)
+			return
+		}
+		vars.DBRedis.SetString(xcxJsApiTicketCacheKey, res.Ticket, time.Second*(7140))
+		return res.Ticket, nil
 	}
 }
 

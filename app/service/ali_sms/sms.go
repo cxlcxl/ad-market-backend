@@ -107,6 +107,7 @@ func BuildAndSend(mobile string) (code string, err error) {
 			_ = model.NewAct(vars.DBMysql).AccountCreate(vars.AccountStateNoAuth, mobile)
 			return code, nil
 		} else {
+			fmt.Println("sms：", err)
 			return "", errors.New("验证码存储失败，请重新发送")
 		}
 	}
