@@ -10,44 +10,9 @@ import (
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
 	utils2 "github.com/wechatpay-apiv3/wechatpay-go/utils"
 	"market/app/model"
+	"market/app/validator/v_data"
 	"market/app/vars"
 )
-
-type PayRequest struct {
-	AppId       string `json:"appid"`        // 公众号APPID
-	Mchid       string `json:"mchid"`        // 直连商户号
-	Description string `json:"description"`  // 商品名称
-	OurTradeNo  string `json:"out_trade_no"` // 商户订单号
-	NotifyUrl   string `json:"notify_url"`   // 通知地址 要求必须为https地址
-	Amount      PayAmt `json:"amount"`       // 金额
-	SceneInfo   Scene  `json:"scene_info"`   // 场景信息
-}
-
-type PayAmt struct {
-	Total    int    `json:"total"`    // 订单总金额，单位为分。
-	Currency string `json:"currency"` // CNY
-}
-
-type Scene struct {
-	PayerClientIp string `json:"payer_client_ip"` // IP
-	H5Info        H5Info `json:"h5_info"`
-}
-
-type H5Info struct {
-	Type string `json:"type"` // iOS, Android, Wap
-}
-
-type PayResponse struct {
-	H5Url   string     `json:"h5_url"`
-	Code    string     `json:"code"`
-	Message string     `json:"message"`
-	Detail  PayResBody `json:"detail"`
-}
-
-type PayResBody struct {
-	Location string `json:"location"`
-	Value    string `json:"value"`
-}
 
 const (
 	// NonceSymbols 随机字符串可用字符集
@@ -56,16 +21,39 @@ const (
 	NonceLength = 32
 )
 
+type ActionResponse struct {
+	OutTradeNo    string `json:"out_trade_no"`
+	Attach        string `json:"attach"`
+	TransactionId string `json:"transaction_id"`
+	TradeState    string `json:"trade_state"` // SUCCESS 表示成功
+	BankType      string `json:"bank_type"`
+	Payer         struct {
+		Openid string `json:"openid"`
+	} `json:"payer"`
+	SceneInfo struct {
+		DeviceId string `json:"device_id"`
+	} `json:"scene_info"`
+}
+
 // UserOrder 用户下单
-func UserOrder(ctx *gin.Context, mobile string) (h5Url string, err error) {
+func UserOrder(ctx *gin.Context, mobile string) (h5Url, outTradeNo string, err error) {
 	order, err := buildLocalOrder(mobile)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	// 微信提供的包
-
+	outTradeNo = order.OutTradeNo
 	h5Url, err = wxPayOrder(ctx, order.OutTradeNo, ctx.ClientIP(), order.OpenId, int64(order.Amt))
 	fmt.Println(err)
+	return
+}
+
+// OrderQuery 用户订单查询
+func OrderQuery(ctx *gin.Context, outTradeNo string) (state int, err error) {
+	state, err = wxPayOrderQuery(ctx, outTradeNo)
+	if state == 1 {
+		err = model.NewOrder(vars.DBMysql).ActionOrder(outTradeNo)
+	}
 	return
 }
 
@@ -96,12 +84,6 @@ func generateNonce() (string, error) {
 		bytes[i] = NonceSymbols[b%symbolsByteLength]
 	}
 	return string(bytes), nil
-}
-
-// ActionOrder 异步回调 TODO
-func ActionOrder(outTradeNo string) (err error) {
-	// 非严谨支付流程，无需查询订单准确状态
-	return model.NewOrder(vars.DBMysql).ActionOrder(outTradeNo)
 }
 
 func wxPayOrder(ctx *gin.Context, outTradeNo, ip, openid string, amt int64) (payUrl string, err error) {
@@ -161,6 +143,59 @@ func wxPayOrder(ctx *gin.Context, outTradeNo, ip, openid string, amt int64) (pay
 		} else {
 			fmt.Println("调用支付失败", result.Response)
 			return "", fmt.Errorf("调用支付失败: %d", result.Response.StatusCode)
+		}
+	}
+}
+
+// ActionOrder 异步回调 TODO
+func ActionOrder(params *v_data.VApiWxPayAction) (err error) {
+	// 非严谨支付流程，无需查询订单准确状态
+	return model.NewOrder(vars.DBMysql).ActionOrder("")
+}
+
+func wxPayOrderQuery(ctx *gin.Context, outTradeNo string) (state int, err error) {
+	var (
+		mchID                      = vars.YmlConfig.GetString("WxPay.Mchid")    // 商户号
+		mchCertificateSerialNumber = vars.YmlConfig.GetString("WxPay.SerialNo") // 商户证书序列号
+		mchAPIv3Key                = vars.YmlConfig.GetString("WxPay.ApiV3")    // 商户APIv3密钥
+	)
+
+	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+	mchPrivateKey, err := utils2.LoadPrivateKeyWithPath(vars.BasePath + "/config/apiclient_key.pem")
+	if err != nil {
+		return 0, fmt.Errorf("商户密钥加载失败: %s", err.Error())
+	}
+	// 使用商户私钥等初始化 client，并使它具有自动定时获取微信支付平台证书的能力
+	opts := []core.ClientOption{
+		option.WithWechatPayAutoAuthCipher(mchID, mchCertificateSerialNumber, mchPrivateKey, mchAPIv3Key),
+	}
+	client, err := core.NewClient(ctx, opts...)
+	if err != nil {
+		return 0, fmt.Errorf("创建查询客户端失败: %s", err.Error())
+	}
+
+	svc := h5.H5ApiService{Client: client}
+	//svc := jsapi.JsapiApiService{Client: client}
+	resp, result, err := svc.QueryOrderByOutTradeNo(ctx,
+		h5.QueryOrderByOutTradeNoRequest{
+			Mchid:      core.String(vars.YmlConfig.GetString("WxPay.Mchid")),
+			OutTradeNo: core.String(outTradeNo),
+		},
+	)
+
+	if err != nil {
+		return 0, fmt.Errorf("调用支付失败: %s", err.Error())
+	} else {
+		// 处理返回结果
+		if result.Response.StatusCode == 200 {
+			fmt.Println("查询完成：", resp)
+			if *resp.TradeState == "SUCCESS" {
+				return 1, nil
+			}
+			return 2, nil
+		} else {
+			fmt.Println("查询失败", result.Response)
+			return 0, fmt.Errorf("查询失败: %d", result.Response.StatusCode)
 		}
 	}
 }

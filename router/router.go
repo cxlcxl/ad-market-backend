@@ -13,10 +13,10 @@ func Router() error {
 	//if vars.YmlConfig.GetBool("HttpServer.AllowCrossDomain") {
 	r.Use(corsNext())
 	//}
+	r.POST("/wxpay/action", (validator.BsValidator{}).VApiWxPayAction)
 
 	group := r.Group(vars.ApiPrefix)
 	{
-		group.POST("/wxpay/action", (validator.BsValidator{}).VApiWxPayAction)
 		// 开放小程序&页面短信API
 		initFrontV1Apis(group)
 

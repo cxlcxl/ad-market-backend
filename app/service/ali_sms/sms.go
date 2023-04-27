@@ -120,8 +120,6 @@ func ValidSmsCode(mobile, code string) (err error) {
 		return errors.New("验证码错误")
 	} else {
 		_ = vars.DBRedis.ExpireTime(key, 1)
-		return model.NewAct(vars.DBMysql).AccountUpdateByMobile(map[string]interface{}{
-			"state": vars.AccountStateNoPaid,
-		}, mobile)
+		return nil
 	}
 }

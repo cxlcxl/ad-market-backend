@@ -15,6 +15,7 @@ func initFrontV1Apis(g *gin.RouterGroup) {
 	group := g.Group("/v1", middleware.CheckApiSecret()) //
 	{
 		group.POST("/pay", (validator.BsValidator{}).VApiOrder)
+		group.POST("/query-order", (validator.BsValidator{}).VApiOrderQuery)
 
 		group.POST("/login", (validator.BsValidator{}).VApiLogin)
 

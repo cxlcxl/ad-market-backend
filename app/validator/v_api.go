@@ -22,6 +22,11 @@ func (v BsValidator) VApiOrder(ctx *gin.Context) {
 	bindData(ctx, &params, (&handlers.Payment{}).Order)
 }
 
+func (v BsValidator) VApiOrderQuery(ctx *gin.Context) {
+	var params v_data.VApiOrderQuery
+	bindData(ctx, &params, (&handlers.Payment{}).OrderQuery)
+}
+
 func (v BsValidator) VAccountSms(ctx *gin.Context) {
 	var params v_data.VAccountSms
 	bindData(ctx, &params, (&handlers.Account{}).AccountSms)

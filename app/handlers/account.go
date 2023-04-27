@@ -85,14 +85,15 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 				return
 			}
 		} else {
-			_ = model.NewAct(vars.DBMysql).AccountCreate(vars.AccountStateNoPaid, params.Mobile)
+			d := map[string]interface{}{"state": vars.AccountStateNoPaid}
+			_ = model.NewAct(vars.DBMysql).AccountUpdateByMobile(d, params.Mobile)
 		}
 		// 验证通过直接支付下单
-		rs, err := servicepayment.UserOrder(ctx, params.Mobile)
+		rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
 		if err != nil {
 			response.Fail(ctx, "下单失败请重试："+err.Error())
 		} else {
-			response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付", "order": rs})
+			response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付", "order": rs, "order_sn": outTradeNo})
 		}
 	}
 }

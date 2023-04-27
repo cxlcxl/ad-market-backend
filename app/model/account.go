@@ -35,6 +35,11 @@ func (m *Account) FindAccountStateByMobile(mobile string) (act *Account) {
 	return
 }
 
+func (m *Account) FindAccountByMobile(mobile string) (ct int64) {
+	m.Table(m.TableName()).Where("mobile = ?", mobile).Count(&ct)
+	return
+}
+
 func (m *Account) AccountList(mobile, accountName string, state uint8, offset, limit int64) (ls []*Account, total int64, err error) {
 	tbl := m.Table(m.TableName()).Order("updated_at desc")
 	if len(accountName) > 0 {
@@ -56,6 +61,9 @@ func (m *Account) AccountList(mobile, accountName string, state uint8, offset, l
 }
 
 func (m *Account) AccountCreate(state int, mobile string) (err error) {
+	if ct := m.FindAccountByMobile(mobile); ct > 0 {
+		return nil
+	}
 	err = m.Exec("insert ignore into accounts(mobile, state, created_at) values(?, ?, NOW())", mobile, state).Error
 	return
 }
