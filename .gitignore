@@ -8,3 +8,5 @@ web/storage
 go.mod
 go.sum
 config/web.yaml
+config/apiclient_key.pem
+config/cert

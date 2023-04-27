@@ -15,6 +15,7 @@ type Order struct {
 	Mobile     string `json:"mobile"`
 	OutTradeNo string `json:"out_trade_no"`
 	State      uint8  `json:"state"`
+	OpenId     string `json:"openid" gorm:"column:openid"`
 }
 
 // NewOrder 实例
