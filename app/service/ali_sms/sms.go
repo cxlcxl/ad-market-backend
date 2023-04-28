@@ -115,6 +115,9 @@ func BuildAndSend(mobile string) (code string, err error) {
 
 // ValidSmsCode 验证并存储信息
 func ValidSmsCode(mobile, code string) (err error) {
+	if vars.YmlConfig.GetBool("Debug") {
+		return nil
+	}
 	key := fmt.Sprintf("%s:%s", smsCacheKey, mobile)
 	if _code := vars.DBRedis.GetString(key); code != _code {
 		return errors.New("验证码错误")

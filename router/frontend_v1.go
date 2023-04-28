@@ -9,12 +9,14 @@ import (
 )
 
 func initFrontV1Apis(g *gin.RouterGroup) {
+	g.POST("/wxpay/action", (validator.BsValidator{}).VApiWxPayAction)
 	g.GET("/v1/asset/:code", (validator.BsValidator{}).VAsset)
 	//g.GET("/v1/urllink", (&handlers.Api{}).GetUrlLink)
 
 	group := g.Group("/v1", middleware.CheckApiSecret()) //
 	{
 		group.POST("/pay", (validator.BsValidator{}).VApiOrder)
+		//group.POST("/pay", (validator.BsValidator{}).VApiJsApiOrder)
 		group.POST("/query-order", (validator.BsValidator{}).VApiOrderQuery)
 
 		group.POST("/login", (validator.BsValidator{}).VApiLogin)

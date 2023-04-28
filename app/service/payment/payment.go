@@ -8,6 +8,7 @@ import (
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 	utils2 "github.com/wechatpay-apiv3/wechatpay-go/utils"
 	"market/app/model"
 	"market/app/validator/v_data"
@@ -44,6 +45,19 @@ func UserOrder(ctx *gin.Context, mobile string) (h5Url, outTradeNo string, err e
 	// 微信提供的包
 	outTradeNo = order.OutTradeNo
 	h5Url, err = wxPayOrder(ctx, order.OutTradeNo, ctx.ClientIP(), order.OpenId, int64(order.Amt))
+	fmt.Println(err)
+	return
+}
+
+// JsApiOrder 用户下单
+func JsApiOrder(ctx *gin.Context, mobile string) (h5Url, outTradeNo string, err error) {
+	order, err := buildLocalOrder(mobile)
+	if err != nil {
+		return "", "", err
+	}
+	// 微信提供的包
+	outTradeNo = order.OutTradeNo
+	h5Url, err = wxPayJsApiOrder(ctx, order.OutTradeNo, ctx.ClientIP(), order.OpenId, int64(order.Amt))
 	fmt.Println(err)
 	return
 }
@@ -139,6 +153,60 @@ func wxPayOrder(ctx *gin.Context, outTradeNo, ip, openid string, amt int64) (pay
 		if result.Response.StatusCode == 200 {
 			fmt.Println("h5 下单完成：", resp.H5Url)
 			payUrl = *resp.H5Url
+			return
+		} else {
+			fmt.Println("调用支付失败", result.Response)
+			return "", fmt.Errorf("调用支付失败: %d", result.Response.StatusCode)
+		}
+	}
+}
+
+func wxPayJsApiOrder(ctx *gin.Context, outTradeNo, ip, openid string, amt int64) (prepayId string, err error) {
+	var (
+		mchID                      = vars.YmlConfig.GetString("WxPay.Mchid")    // 商户号
+		mchCertificateSerialNumber = vars.YmlConfig.GetString("WxPay.SerialNo") // 商户证书序列号
+		mchAPIv3Key                = vars.YmlConfig.GetString("WxPay.ApiV3")    // 商户APIv3密钥
+	)
+
+	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+	mchPrivateKey, err := utils2.LoadPrivateKeyWithPath(vars.BasePath + "/config/apiclient_key.pem")
+	if err != nil {
+		return "", fmt.Errorf("商户密钥加载失败: %s", err.Error())
+	}
+	// 使用商户私钥等初始化 client，并使它具有自动定时获取微信支付平台证书的能力
+	opts := []core.ClientOption{
+		option.WithWechatPayAutoAuthCipher(mchID, mchCertificateSerialNumber, mchPrivateKey, mchAPIv3Key),
+	}
+	client, err := core.NewClient(ctx, opts...)
+	if err != nil {
+		return "", fmt.Errorf("创建支付客户端失败: %s", err.Error())
+	}
+
+	svc := jsapi.JsapiApiService{Client: client}
+	resp, result, err := svc.Prepay(ctx,
+		jsapi.PrepayRequest{
+			Appid:       core.String(vars.YmlConfig.GetString("WxPay.AppId")),
+			Mchid:       core.String(vars.YmlConfig.GetString("WxPay.Mchid")),
+			Description: core.String(vars.YmlConfig.GetString("WxPay.Desc")),
+			OutTradeNo:  core.String(outTradeNo),
+			NotifyUrl:   core.String(vars.YmlConfig.GetString("WxPay.NotifyUrl")),
+			Amount: &jsapi.Amount{
+				Currency: core.String("CNY"),
+				Total:    core.Int64(amt),
+			},
+			Payer: &jsapi.Payer{
+				Openid: core.String(openid),
+			},
+		},
+	)
+
+	if err != nil {
+		return "", fmt.Errorf("调用支付失败: %s", err.Error())
+	} else {
+		// 处理返回结果
+		if result.Response.StatusCode == 200 {
+			fmt.Println("jsapi 下单完成：", resp.PrepayId)
+			prepayId = *resp.PrepayId
 			return
 		} else {
 			fmt.Println("调用支付失败", result.Response)

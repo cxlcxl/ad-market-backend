@@ -89,6 +89,7 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 			_ = model.NewAct(vars.DBMysql).AccountUpdateByMobile(d, params.Mobile)
 		}
 		// 验证通过直接支付下单
+		//rs, outTradeNo, err := servicepayment.JsApiOrder(ctx, params.Mobile)
 		rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
 		if err != nil {
 			response.Fail(ctx, "下单失败请重试："+err.Error())

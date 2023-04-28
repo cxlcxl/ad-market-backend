@@ -33,6 +33,16 @@ func (h *Payment) Order(ctx *gin.Context, p interface{}) {
 	}
 }
 
+func (h *Payment) JsApiOrder(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VApiOrder)
+	prepayId, sn, err := servicepayment.JsApiOrder(ctx, params.Mobile)
+	if err != nil {
+		response.Fail(ctx, "下单失败："+err.Error())
+	} else {
+		response.Success(ctx, gin.H{"info": "下单成功跳转支付", "prepay_id": prepayId, "order_sn": sn})
+	}
+}
+
 func (h *Payment) OrderQuery(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VApiOrderQuery)
 	state, err := servicepayment.OrderQuery(ctx, params.Sn)

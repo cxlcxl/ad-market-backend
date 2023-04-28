@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"market/app/validator"
 	"market/app/vars"
 	"net/http"
 )
@@ -13,7 +12,6 @@ func Router() error {
 	//if vars.YmlConfig.GetBool("HttpServer.AllowCrossDomain") {
 	r.Use(corsNext())
 	//}
-	r.POST("/wxpay/action", (validator.BsValidator{}).VApiWxPayAction)
 
 	group := r.Group(vars.ApiPrefix)
 	{
