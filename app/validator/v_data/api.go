@@ -20,6 +20,10 @@ type VApiLogin struct {
 	Code string `json:"code" binding:"required"`
 }
 
+type VXcxSdk struct {
+	PageUrl string `json:"page_url" binding:"required"`
+}
+
 type VApiOrder struct {
 	Mobile string `json:"mobile" binding:"required,mobile"`
 }

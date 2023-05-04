@@ -37,9 +37,9 @@ type ApiUrlLinkResponse struct {
 
 func (h *Api) Login(ctx *gin.Context, p interface{}) {
 	params := p.(*v_data.VApiLogin)
-	xcxLoginUrl := vars.YmlConfig.GetString("XCXLogin.Url")
-	appId := vars.YmlConfig.GetString("XCXLogin.AppId")
-	secret := vars.YmlConfig.GetString("XCXLogin.Secret")
+	xcxLoginUrl := vars.YmlConfig.GetString("WxLogin.Url")
+	appId := vars.YmlConfig.GetString("WxLogin.AppId")
+	secret := vars.YmlConfig.GetString("WxLogin.Secret")
 	data := map[string]string{"appid": appId, "secret": secret, "js_code": params.Code, "grant_type": "authorization_code"}
 	var res ApiLoginResponse
 	queryParams := curl.HttpBuildQuery(data)
@@ -61,9 +61,9 @@ func (h *Api) GetUrlLink(ctx *gin.Context) {
 		response.Fail(ctx, "请求失败："+err.Error())
 		return
 	}
-	xcxSchemeUrl := vars.YmlConfig.GetString("XCXLogin.UrlLink")
-	data := map[string]string{"path": "pages/friend/friend"}
-	var res ApiUrlLinkResponse
+	xcxSchemeUrl := vars.YmlConfig.GetString("WxLogin.Scheme")
+	data := map[string]interface{}{"jump_wxa": map[string]string{"path": "pages/friend/friend"}}
+	var res ApiSchemeResponse
 	c, err := curl.New(xcxSchemeUrl + token).Post().JsonData(data)
 	if err != nil {
 		response.Fail(ctx, "请求失败："+err.Error())
@@ -72,16 +72,43 @@ func (h *Api) GetUrlLink(ctx *gin.Context) {
 	if err := c.Request(&res, curl.JsonHeader()); err != nil {
 		response.Fail(ctx, "登陆接口调用失败："+err.Error())
 	} else {
-		fmt.Println(res, res.UrlLink)
+		fmt.Println(res, res.OpenLink)
 		if res.ErrCode == 0 {
-			response.Success(ctx, res.UrlLink)
+			response.Success(ctx, res.OpenLink)
 		} else {
 			response.Fail(ctx, "获取失败："+res.ErrMsg)
 		}
 	}
 }
 
-func (h *Api) XcxSdk(ctx *gin.Context) {
+func (h *Api) GetUrlLink1(ctx *gin.Context) {
+	token, err := servicexcx.GetAccessToken()
+	if err != nil {
+		response.Fail(ctx, "请求失败："+err.Error())
+		return
+	}
+	xcxSchemeUrl := vars.YmlConfig.GetString("WxLogin.Scheme")
+	data := map[string]string{"path": "pages/friend/friend"}
+	var res ApiSchemeResponse
+	c, err := curl.New(xcxSchemeUrl + token).Post().JsonData(data)
+	if err != nil {
+		response.Fail(ctx, "请求失败："+err.Error())
+		return
+	}
+	if err := c.Request(&res, curl.JsonHeader()); err != nil {
+		response.Fail(ctx, "登陆接口调用失败："+err.Error())
+	} else {
+		fmt.Println(res, res.OpenLink)
+		if res.ErrCode == 0 {
+			response.Success(ctx, res.OpenLink)
+		} else {
+			response.Fail(ctx, "获取失败："+res.ErrMsg)
+		}
+	}
+}
+
+func (h *Api) XcxSdk(ctx *gin.Context, p interface{}) {
+	params := p.(*v_data.VXcxSdk)
 	nonce := utils.GenerateSecret(16)
 	ticket, err := servicexcx.GetJsApiTicket()
 	if err != nil {
@@ -89,10 +116,9 @@ func (h *Api) XcxSdk(ctx *gin.Context) {
 		return
 	}
 	timestamp := time.Now().Unix()
-	h5Url := vars.YmlConfig.GetString("XCXLogin.H5Domain")
-	s := fmt.Sprintf("jsapi_ticket=%s&noncestr=%s&timestamp=%d&url=%s", nonce, ticket, timestamp, h5Url)
+	s := fmt.Sprintf("jsapi_ticket=%s&noncestr=%s&timestamp=%d&url=%s", ticket, nonce, timestamp, params.PageUrl)
 	response.Success(ctx, gin.H{
-		"app_id":    vars.YmlConfig.GetString("XCXLogin.AppId"),
+		"app_id":    vars.YmlConfig.GetString("WxLogin.AppId"),
 		"timestamp": timestamp,
 		"nonce":     nonce,
 		"signature": utils.Sha1(s),

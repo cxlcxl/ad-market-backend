@@ -17,6 +17,11 @@ func (v BsValidator) VApiLogin(ctx *gin.Context) {
 	bindData(ctx, &params, (&handlers.Api{}).Login)
 }
 
+func (v BsValidator) VXcxSdk(ctx *gin.Context) {
+	var params v_data.VXcxSdk
+	bindData(ctx, &params, (&handlers.Api{}).XcxSdk)
+}
+
 func (v BsValidator) VApiOrder(ctx *gin.Context) {
 	var params v_data.VApiOrder
 	bindData(ctx, &params, (&handlers.Payment{}).Order)

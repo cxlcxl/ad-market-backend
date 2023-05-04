@@ -22,11 +22,11 @@ func GetAccessToken() (token string, err error) {
 		fmt.Println("token: ", token)
 		return
 	} else {
-		tokenUrl := vars.YmlConfig.GetString("XCXLogin.AccessToken")
+		tokenUrl := vars.YmlConfig.GetString("WxLogin.AccessToken")
 		d := map[string]string{
 			"grant_type": "client_credential",
-			"appid":      vars.YmlConfig.GetString("XCXLogin.AppId"),
-			"secret":     vars.YmlConfig.GetString("XCXLogin.Secret"),
+			"appid":      vars.YmlConfig.GetString("WxLogin.AppId"),
+			"secret":     vars.YmlConfig.GetString("WxLogin.Secret"),
 		}
 		var res TokenResponse
 		queryParams := curl.HttpBuildQuery(d)
@@ -58,7 +58,7 @@ func GetJsApiTicket() (ticket string, err error) {
 		if err != nil {
 			return
 		}
-		ticketUrl := vars.YmlConfig.GetString("XCXLogin.JsApiTicket")
+		ticketUrl := vars.YmlConfig.GetString("WxLogin.JsApiTicket")
 		d := map[string]string{"type": "jsapi", "access_token": token}
 		var res TicketResponse
 		queryParams := curl.HttpBuildQuery(d)
@@ -89,7 +89,7 @@ func GetUserPhoneNumber(code string) (mobile *PhoneInfo, err error) {
 	if err != nil {
 		return
 	}
-	mobileUrl := vars.YmlConfig.GetString("XCXLogin.UserMobile")
+	mobileUrl := vars.YmlConfig.GetString("WxLogin.UserMobile")
 	d := map[string]string{"access_token": token, "code": code}
 	var res MobileResponse
 	queryParams := curl.HttpBuildQuery(d)

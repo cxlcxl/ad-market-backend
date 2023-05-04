@@ -30,7 +30,7 @@ func initFrontV1Apis(g *gin.RouterGroup) {
 		group.GET("/config", (&handlers.Config{}).ApiFindKey)
 		group.GET("/configs", (&handlers.Config{}).ApiFindKeys)
 
-		group.POST("/xcx-sdk", (&handlers.Api{}).XcxSdk)
+		group.POST("/xcx-sdk", (validator.BsValidator{}).VXcxSdk)
 		group.GET("/urllink", (&handlers.Api{}).GetUrlLink)
 	}
 }
