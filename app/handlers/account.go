@@ -5,7 +5,6 @@ import (
 	"market/app/model"
 	"market/app/response"
 	"market/app/service/ali_sms"
-	servicepayment "market/app/service/payment"
 	"market/app/utils"
 	"market/app/validator/v_data"
 	"market/app/vars"
@@ -90,11 +89,12 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 		}
 		// 验证通过直接支付下单
 		//rs, outTradeNo, err := servicepayment.JsApiOrder(ctx, params.Mobile)
-		rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
+		/*rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
 		if err != nil {
 			response.Fail(ctx, "下单失败请重试："+err.Error())
 		} else {
 			response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付", "order": rs, "order_sn": outTradeNo})
-		}
+		}*/
+		response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付"})
 	}
 }
