@@ -83,10 +83,9 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 				response.Success(ctx, gin.H{"state": 2, "info": "已支付的手机号，请直接跳转"})
 				return
 			}
-		} else {
-			d := map[string]interface{}{"state": vars.AccountStateNoPaid}
-			_ = model.NewAct(vars.DBMysql).AccountUpdateByMobile(d, params.Mobile)
 		}
+		d := map[string]interface{}{"state": vars.AccountStateNoPaid}
+		_ = model.NewAct(vars.DBMysql).AccountUpdateByMobile(d, params.Mobile)
 		// 验证通过直接支付下单
 		//rs, outTradeNo, err := servicepayment.JsApiOrder(ctx, params.Mobile)
 		/*rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
