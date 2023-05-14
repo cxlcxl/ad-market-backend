@@ -69,3 +69,7 @@ WxPay:
   ActionKey: ""
   H5:
     Order: "https://api.mch.weixin.qq.com/v3/pay/transactions/h5"
+
+BDOCPC:
+  EventUrl: "https://ocpc.baidu.com/ocpcapi/api/uploadConvertData"
+  TOKEN: ""

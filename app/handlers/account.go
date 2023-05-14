@@ -5,6 +5,7 @@ import (
 	"market/app/model"
 	"market/app/response"
 	"market/app/service/ali_sms"
+	servicepayment "market/app/service/payment"
 	"market/app/utils"
 	"market/app/validator/v_data"
 	"market/app/vars"
@@ -75,7 +76,7 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 		response.Fail(ctx, "验证码错误")
 		return
 	}
-	if err := ali_sms.ValidSmsCode(params.Mobile, params.Code); err != nil {
+	if err := ali_sms.ValidSmsCode(params.Mobile, params.Code, params.LogIdUrl); err != nil {
 		response.Fail(ctx, "验证失败："+err.Error())
 	} else {
 		if act := model.NewAct(vars.DBMysql).FindAccountStateByMobile(params.Mobile); act != nil {
@@ -88,12 +89,12 @@ func (h *Account) AccountSmsValid(ctx *gin.Context, p interface{}) {
 		_ = model.NewAct(vars.DBMysql).AccountUpdateByMobile(d, params.Mobile)
 		// 验证通过直接支付下单
 		//rs, outTradeNo, err := servicepayment.JsApiOrder(ctx, params.Mobile)
-		/*rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
+		rs, outTradeNo, err := servicepayment.UserOrder(ctx, params.Mobile)
 		if err != nil {
 			response.Fail(ctx, "下单失败请重试："+err.Error())
 		} else {
 			response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付", "order": rs, "order_sn": outTradeNo})
-		}*/
-		response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付"})
+		}
+		//response.Success(ctx, gin.H{"state": 1, "info": "验证手机号成功，下单成功跳转支付"})
 	}
 }

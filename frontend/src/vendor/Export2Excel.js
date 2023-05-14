@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { saveAs } from "file-saver";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
+import { parseTime } from "@/utils"
 
 function generateArray(table) {
   var out = [];
@@ -229,26 +230,29 @@ export function export_json_to_excel({
   );
 }
 
-export function formatJson(data, _default = "") {
-  if (!data.columns || !data.list) {
-    return [];
-  }
-  if (!Array.isArray(data.columns) || !Array.isArray(data.list)) {
+export function formatJson(columns, data, _default = "") {
+  if (!Array.isArray(data.list)) {
     return [];
   }
 
   let rs = [];
   for (let i = 0; i < data.list.length; i++) {
     let line = [];
-    data.columns.map((item) => {
-      if (item.show) {
-        line.push(
-          data.list[i][item.key] || data.list[i][item.key] === 0
-            ? data.list[i][item.key]
-            : _default
-        );
+    for (let k = 0; k < columns.length; k++) {
+      let column = columns[k]
+      let _val = ''
+      if (column === 'state') {
+        _val = data.state[data.list[i][column]]
+      } else if (column === 'created_at') {
+        _val = parseTime(data.list[i][column])
+      } else {
+        _val = data.list[i][column] || data.list[i][column] === 0
+          ? data.list[i][column]
+          : _default
       }
-    });
+
+      line.push(_val);
+    }
     rs.push(line);
   }
 

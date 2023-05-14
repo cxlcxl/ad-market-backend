@@ -11,6 +11,7 @@ import (
 	"market/app/model"
 	"market/app/utils"
 	"market/app/vars"
+	"market/library/curl"
 	"time"
 )
 
@@ -114,15 +115,38 @@ func BuildAndSend(mobile string) (code string, err error) {
 }
 
 // ValidSmsCode 验证并存储信息
-func ValidSmsCode(mobile, code string) (err error) {
+func ValidSmsCode(mobile, code, logIdUrl string) (err error) {
 	if vars.YmlConfig.GetBool("Debug") {
+		eventReport(logIdUrl)
 		return nil
 	}
 	key := fmt.Sprintf("%s:%s", smsCacheKey, mobile)
 	if _code := vars.DBRedis.GetString(key); code != _code {
 		return errors.New("验证码错误")
 	} else {
+		eventReport(logIdUrl)
 		_ = vars.DBRedis.ExpireTime(key, 1)
 		return nil
 	}
+}
+
+func eventReport(logIdUrl string) {
+	data := map[string]interface{}{
+		"token": vars.YmlConfig.GetString("BDOCPC.TOKEN"),
+		"conversionTypes": []map[string]interface{}{
+			{"logidUrl": logIdUrl, "newType": 3},
+		},
+	}
+	c, err := curl.New(vars.YmlConfig.GetString("BDOCPC.EventUrl")).Post().JsonData(data)
+	if err != nil {
+		fmt.Println("请求组合失败：", err)
+		return
+	}
+	var response interface{}
+	err = c.Request(&response, curl.JsonHeader())
+	if err != nil {
+		fmt.Println("请求失败：", err)
+		return
+	}
+	fmt.Println("上报响应：", response)
 }

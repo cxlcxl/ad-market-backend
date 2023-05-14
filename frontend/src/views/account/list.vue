@@ -13,6 +13,7 @@
         </el-form-item>
         <el-form-item label="">
           <el-button type="primary" icon="el-icon-search" class="item" @click="doSearch">查询</el-button>
+          <el-button icon="el-icon-download" class="item" @click="download" :loading="loadings.downloadLoading">导出</el-button>
         </el-form-item>
       </el-form>
     </el-col>
@@ -32,10 +33,6 @@
           <template slot-scope="scope">
             <el-button-group class="table-operate">
               <el-button type="primary" plain @click.native.prevent="editRow(scope.row.id)">编辑</el-button>
-              <template v-if="scope.row.account_type === 1">
-                <el-button type="primary" plain @click.native.prevent="doRefresh(scope.row.id)" v-if="scope.row.is_auth === 1">刷新</el-button>
-                <el-button type="primary" plain @click.native.prevent="doAuth(scope.row.id)" v-else>认证</el-button>
-              </template>
             </el-button-group>
           </template>
         </el-table-column>
@@ -65,8 +62,8 @@ export default {
     return {
       loadings: {
         pageLoading: false,
+        downloadLoading: false
       },
-      account_types: {},
       accountList: {
         total: 0,
         list: [],
@@ -99,10 +96,9 @@ export default {
         .then((response) => {
           accountList(this.search)
             .then((res) => {
-              const { list, total, types, state } = res.data
+              const { list, total, state } = res.data
               this.accountList.list = list
               this.accountList.total = total
-              this.account_types = types
               this.accountList.state = state
               this.loadings.pageLoading = false
             })
@@ -120,44 +116,6 @@ export default {
     editRow(id) {
       this.$refs.accountUpdate.initUpdate(id)
     },
-    doRefresh(id) {
-      this.$confirm("确定刷新此账户的认证信息吗?", "确认信息", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "success",
-      })
-        .then(() => {
-          this.loadings.pageLoading = true
-          refreshAuth(id)
-            .then((res) => {
-              this.loadings.pageLoading = false
-              this.$message.success("刷新成功")
-            })
-            .catch((err) => {
-              this.loadings.pageLoading = false
-            })
-        })
-        .catch(() => {})
-    },
-    doAuth(id) {
-      this.$confirm("确认认证此账号么?", "确认信息", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "success",
-      })
-        .then(() => {
-          this.loadings.pageLoading = true
-          accountAuth(id)
-            .then((res) => {
-              this.loadings.pageLoading = false
-              window.open(res.data)
-            })
-            .catch((err) => {
-              this.loadings.pageLoading = false
-            })
-        })
-        .catch(() => {})
-    },
     doSearch() {
       this.search.page = 1
       this.getAccountList()
@@ -169,6 +127,26 @@ export default {
     handlePageSize(p) {
       this.search.page_size = p
       this.getAccountList()
+    },
+    download() {
+      if (this.accountList.total === 0) {
+        this.$message.info('没有需导出的数据')
+        return
+      }
+      this.loadings.downloadLoading = true
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['mobile', 'account_name', 'state', 'remark', 'created_at']
+        const data = excel.formatJson(tHeader, this.accountList)
+        if (data.length === 0) {
+          this.$message.info('没有筛选到需导出的数据')
+          return
+        }
+        excel.export_json_to_excel({ header: tHeader, data, filename: '商机' })
+        this.loadings.downloadLoading = false
+      }).catch(err => {
+        console.log(err)
+        this.loadings.downloadLoading = false
+      })
     },
   },
 }

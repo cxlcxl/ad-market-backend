@@ -21,6 +21,7 @@ type VAccountSms struct {
 }
 
 type VAccountSmsValid struct {
-	Mobile string `json:"mobile" binding:"required,mobile"`
-	Code   string `json:"code" binding:"required"`
+	Mobile   string `json:"mobile" binding:"required,mobile"`
+	Code     string `json:"code" binding:"required"`
+	LogIdUrl string `json:"log_id_url" binding:"required"`
 }
